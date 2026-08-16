@@ -1,0 +1,29 @@
+.login-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+@media(max-width:860px){.login-wrap{grid-template-columns:1fr;}}
+.login-brand-panel{background:linear-gradient(155deg, var(--ink) 0%, var(--ink-2) 60%, #1c4038 100%);color:#EAF2F1;display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden;}
+@media(max-width:860px){.login-brand-panel{display:none;}}
+.login-brand-top{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;position:relative;z-index:1;}
+.login-brand-top .dot{width:9px;height:9px;border-radius:50%;background:#7FD8B0;box-shadow:0 0 0 4px #7fd8b02b;}
+.login-brand-mid{position:relative;z-index:1;max-width:380px;}
+.login-brand-mid h2{font-size:26px;line-height:1.5;margin:0 0 12px;}
+.login-brand-mid p{color:#B7C7C6;font-size:14px;line-height:1.9;}
+.login-brand-bottom{font-size:12px;color:#7C9391;position:relative;z-index:1;font-family:'IBM Plex Mono',monospace;}
+
+.login-form-panel{display:flex;align-items:center;justify-content:center;padding:32px;position:relative;}
+.login-card{width:100%;max-width:380px;}
+.login-card .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin:0 0 8px;}
+.login-card h1{font-size:24px;margin:0 0 6px;}
+.login-card .sub{color:var(--muted);font-size:13.5px;margin:0 0 28px;}
+.remember-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.remember-label{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;}
+.remember-label input{width:16px;height:16px;accent-color:var(--primary);}
+.forgot-link{font-size:13px;color:var(--primary);text-decoration:none;font-weight:600;}
+.forgot-link:hover{text-decoration:underline;}
+.login-alert{display:none;align-items:center;gap:10px;background:var(--error-soft);color:var(--error);border:1px solid #f1c9c6;padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:18px;}
+.login-alert.show{display:flex;}
+.login-alert svg{width:16px;height:16px;flex-shrink:0;}
+.spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;display:none;}
+.btn-primary.loading .spinner{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.login-footer-slot{margin-top:26px;padding-top:18px;border-top:1px dashed var(--line);display:flex;align-items:center;justify-content:space-between;}
+.login-footer-slot .footer-lang-label{font-size:12px;}

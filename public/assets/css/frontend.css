@@ -1,0 +1,11 @@
+.fe-header{background:var(--paper-card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:16px 32px;}
+.fe-brand{font-family:'Tajawal';font-weight:800;font-size:18px;display:flex;align-items:center;gap:8px;}
+.fe-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--primary);}
+.fe-nav{display:flex;gap:26px;font-size:14px;color:var(--muted);}
+.fe-nav a{text-decoration:none;color:var(--muted);font-weight:600;}
+.fe-nav a.active{color:var(--primary);}
+.fe-hero{max-width:720px;margin:0 auto;padding:110px 24px;text-align:center;}
+.fe-hero .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:0 0 14px;}
+.fe-hero h1{font-size:34px;margin:0 0 14px;}
+.fe-hero p{color:var(--muted);font-size:15px;line-height:1.9;margin:0;}
+.fe-footer{border-top:1px solid var(--line);padding:16px 32px;color:var(--muted);font-size:12.5px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
