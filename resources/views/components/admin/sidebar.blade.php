@@ -34,5 +34,16 @@
                 <a href="#" class="sidebar-subitem">{{ __('navigation.permissions') }}</a>
             </div>
         </div>
+
+        {{-- Reference pages — living documentation, not tied to Database (see routes/web.php) --}}
+        <a href="{{ route('admin.system-design') }}" class="sidebar-item {{ request()->routeIs('admin.system-design') ? 'active' : '' }}">
+            <x-icon name="settings" />
+            <span class="sidebar-label">{{ __('navigation.system_design') }}</span>
+        </a>
+
+        <a href="{{ route('admin.documentation') }}" class="sidebar-item {{ request()->routeIs('admin.documentation') ? 'active' : '' }}">
+            <x-icon name="file-text" />
+            <span class="sidebar-label">{{ __('navigation.documentation') }}</span>
+        </a>
     </nav>
 </aside>

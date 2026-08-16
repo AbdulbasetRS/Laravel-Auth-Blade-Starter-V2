@@ -8,6 +8,8 @@ return [
     'roles' => 'Roles & Permissions',
     'create_role' => 'Create Role',
     'permissions' => 'Permissions',
+    'system_design' => 'System Design',
+    'documentation' => 'Documentation',
     'profile' => 'Profile',
     'settings' => 'Settings',
     'logout' => 'Logout',

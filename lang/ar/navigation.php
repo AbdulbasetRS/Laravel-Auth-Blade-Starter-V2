@@ -8,6 +8,8 @@ return [
     'roles' => 'الأدوار والصلاحيات',
     'create_role' => 'إنشاء دور جديد',
     'permissions' => 'الصلاحيات',
+    'system_design' => 'تصميم النظام',
+    'documentation' => 'التوثيق',
     'profile' => 'الملف الشخصي',
     'settings' => 'الإعدادات',
     'logout' => 'تسجيل الخروج',
