@@ -8,12 +8,27 @@
 (function () {
   function closeAll(except) {
     document.querySelectorAll('.gdropdown.open').forEach(function (dd) {
-      if (dd !== except) {
-        dd.classList.remove('open', 'open-up');
-        var trigger = dd.querySelector('.gdropdown-trigger');
-        if (trigger) trigger.setAttribute('aria-expanded', 'false');
-      }
+      if (dd !== except) close(dd);
     });
+  }
+
+  function close(dd) {
+    dd.classList.remove('open');
+    var trigger = dd.querySelector('.gdropdown-trigger');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+
+    // Keep the open-up positioning until the fade-out transition finishes,
+    // so the menu never snaps from "above" to "below" mid-close.
+    if (dd.classList.contains('open-up')) {
+      var menu = dd.querySelector('.gdropdown-menu');
+      var cleanup = function (e) {
+        if (e && e.target !== menu) return;
+        dd.classList.remove('open-up');
+        menu.removeEventListener('transitionend', cleanup);
+      };
+      menu.addEventListener('transitionend', cleanup);
+      setTimeout(cleanup, 200); // fallback safety net
+    }
   }
 
   function position(root) {
