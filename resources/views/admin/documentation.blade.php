@@ -43,3 +43,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/js/docs-nav.js') }}"></script>
+@endpush
