@@ -1,7 +1,7 @@
 /**
  * Users table — Data Request via XMLHttpRequest only (never fetch/axios/jQuery),
  * per the project's XHR rule. Page itself is Blade; this file only owns the
- * table body / pagination / result count / table states.
+ * table body / pagination / result count / table states / export.
  */
 document.addEventListener('DOMContentLoaded', function () {
   var tbody = document.getElementById('usersTableBody');
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         '<td data-col="status">' + statusBadge + '</td>' +
         '<td data-col="verified">' + verified + '</td>' +
         '<td data-col="joined" style="font-family:\'IBM Plex Mono\',monospace;font-size:12px;">' + escapeHtml((user.created_at || '').substring(0, 10)) + '</td>' +
-        '<td>' +
+        '<td data-col="actions">' +
           '<div class="gdropdown" data-role="row-actions">' +
             '<button class="page-btn gdropdown-trigger" type="button" style="width:32px;padding:0;" aria-haspopup="true" aria-expanded="false">' +
               '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>' +
@@ -185,6 +185,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     xhr.send();
   }
+
+  // ---------- Export (Excel / CSV) — respects the current active filters ----------
+  var EXPORT_FILTER_KEYS = ['search', 'status', 'verified', 'date_from', 'date_to', 'sort'];
+
+  document.querySelectorAll('[data-export]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      var format = link.dataset.export;
+      var baseUrl = format === 'excel' ? usersRoutes.exportExcel : usersRoutes.exportCsv;
+
+      var params = EXPORT_FILTER_KEYS
+        .filter(function (key) { return filters[key] !== '' && filters[key] != null; })
+        .map(function (key) { return encodeURIComponent(key) + '=' + encodeURIComponent(filters[key]); })
+        .join('&');
+
+      window.location.href = params ? baseUrl + '?' + params : baseUrl;
+
+      if (window.GlobalDropdown) window.GlobalDropdown.closeAll();
+    });
+  });
 
   fetchUsers();
 });

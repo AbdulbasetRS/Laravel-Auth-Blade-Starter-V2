@@ -95,8 +95,8 @@
         <div class="table-toolbar-actions">
             <x-dropdown variant="light" role="export">
                 <x-slot:trigger><x-icon name="download" style="width:15px;height:15px;" /><span>{{ __('users.export') }}</span></x-slot:trigger>
-                <a href="{{ route('admin.users.export', 'excel') }}" class="gdropdown-item"><x-icon name="file-spreadsheet" /> Excel</a>
-                <a href="{{ route('admin.users.export', 'csv') }}" class="gdropdown-item"><x-icon name="file-text" /> CSV</a>
+                <a href="{{ route('admin.users.export', 'excel') }}" data-export="excel" class="gdropdown-item"><x-icon name="file-spreadsheet" /> Excel</a>
+                <a href="{{ route('admin.users.export', 'csv') }}" data-export="csv" class="gdropdown-item"><x-icon name="file-text" /> CSV</a>
                 <div class="gdropdown-item" role="menuitem" onclick="window.print()"><x-icon name="printer" /> {{ __('users.print') }}</div>
             </x-dropdown>
 
@@ -110,6 +110,11 @@
         </div>
     </div>
 
+    <div class="print-only">
+        <h1>{{ __('navigation.users') }}</h1>
+        <p>{{ now()->format('Y-m-d H:i') }}</p>
+    </div>
+
     <div class="data-table-wrap">
         <table class="data-table">
             <thead>
@@ -118,7 +123,7 @@
                     <th data-col="status">{{ __('users.column_status') }}</th>
                     <th data-col="verified">{{ __('users.column_verified') }}</th>
                     <th data-col="joined">{{ __('users.column_joined') }}</th>
-                    <th></th>
+                    <th data-col="actions"></th>
                 </tr>
             </thead>
             <tbody id="usersTableBody">
@@ -134,7 +139,11 @@
 
 @push('scripts')
 <script>
-    window.usersRoutes = { data: @json(route('admin.users.data')) };
+    window.usersRoutes = {
+        data: @json(route('admin.users.data')),
+        exportExcel: @json(route('admin.users.export', 'excel')),
+        exportCsv: @json(route('admin.users.export', 'csv')),
+    };
     window.usersLabels = {
         loading: @json(__('users.loading')),
         empty: @json(__('users.empty')),
