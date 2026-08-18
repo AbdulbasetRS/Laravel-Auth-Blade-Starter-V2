@@ -8,6 +8,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Exports\UsersExport;
+use Maatwebsite\Excel\Excel as ExcelFormat;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -59,13 +62,15 @@ class UserController extends Controller
      * maatwebsite/excel package (composer require maatwebsite/excel) —
      * not added yet since it wasn't part of this approved pass.
      */
-    public function export(string $format)
+    public function export(string $format, Request $request)
     {
         abort_unless(in_array($format, ['excel', 'csv'], true), 404);
 
-        return response()->json([
-            'success' => false,
-            'message' => "Export to {$format} is not wired yet — install maatwebsite/excel first.",
-        ], 501);
+        $filters = $request->only(['search', 'status', 'verified', 'date_from', 'date_to', 'sort']);
+        $filename = 'users_'.now()->format('Y-m-d_His');
+
+        return $format === 'excel'
+            ? Excel::download(new UsersExport($filters), "{$filename}.xlsx")
+            : Excel::download(new UsersExport($filters), "{$filename}.csv", ExcelFormat::CSV);
     }
 }
