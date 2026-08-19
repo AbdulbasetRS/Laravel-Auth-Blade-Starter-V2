@@ -8,4 +8,7 @@ return [
     'frontend_test_body' => 'هذه صفحة تجريبية للتأكد من عمل الـ Frontend Layout بشكل صحيح. سيتم إضافة المحتوى الفعلي في مراحل لاحقة من المشروع.',
     'admin_test_title' => 'Admin Layout — صفحة اختبار',
     'admin_test_body' => 'هذه صفحة اختبار فقط للتأكد من عمل الـ Navbar والـ Sidebar والـ Footer بشكل صحيح.',
+    'cancel' => 'إلغاء',
+    'confirm' => 'تأكيد',
+    'close' => 'إغلاق',
 ];

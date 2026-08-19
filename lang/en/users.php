@@ -43,4 +43,9 @@ return [
     'delete' => 'Delete',
     'showing_count' => 'Showing :from–:to of :total users',
     'create_placeholder' => 'The Create User form will be built in a separately approved pass.',
+    'id' => 'ID',
+    'confirm_delete_title' => 'Delete User',
+    'confirm_delete_message' => 'Are you sure you want to delete this user? This action cannot be undone.',
+    'delete_success' => 'User deleted successfully.',
+    'delete_error' => 'Unable to delete user.',
 ];

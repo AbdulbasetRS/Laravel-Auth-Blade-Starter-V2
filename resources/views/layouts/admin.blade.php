@@ -36,10 +36,15 @@
     </div>
 </div>
 
+<x-confirmation-modal />
+<x-toast-container />
+
 <script src="{{ asset('assets/js/dropdown.js') }}"></script>
 <script src="{{ asset('assets/js/validation.js') }}"></script>
 <script src="{{ asset('assets/js/theme.js') }}"></script>
 <script src="{{ asset('assets/js/admin.js') }}"></script>
+<script src="{{ asset('assets/js/confirmation-modal.js') }}"></script>
+<script src="{{ asset('assets/js/toast.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

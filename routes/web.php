@@ -34,6 +34,7 @@ Route::group([
                 Route::get('/data', [UserController::class, 'data'])->name('data'); // XHR JSON only
                 Route::get('/create', [UserController::class, 'create'])->name('create');
                 Route::post('/', [UserController::class, 'store'])->name('store');
+                Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
                 Route::get('/export/{format}', [UserController::class, 'export'])->name('export'); // excel|csv
             });
         });

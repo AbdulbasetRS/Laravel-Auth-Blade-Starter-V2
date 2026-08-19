@@ -65,4 +65,9 @@ class UserRepository implements UserRepositoryInterface
 
         return $query;
     }
+
+    public function delete(User $user): bool
+    {
+        return (bool) $user->delete();
+    }
 }

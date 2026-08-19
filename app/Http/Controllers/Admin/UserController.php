@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use App\Exports\UsersExport;
 use Maatwebsite\Excel\Excel as ExcelFormat;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\User;
 
 class UserController extends Controller
 {
@@ -55,6 +56,17 @@ class UserController extends Controller
         // Intentionally left minimal — Create User form/validation is a
         // separate approved requirement, not part of this implementation pass.
         return redirect()->route('admin.users.index');
+    }
+
+    /** Server-side is the source of truth — the modal's item details are for visual review only. */
+    public function destroy(User $user): JsonResponse
+    {
+        $this->users->delete($user);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('users.delete_success'),
+        ]);
     }
 
     /**

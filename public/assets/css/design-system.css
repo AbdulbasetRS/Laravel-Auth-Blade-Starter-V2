@@ -95,3 +95,53 @@ a{color:inherit;}
 .footer-controls{display:flex;align-items:center;gap:8px;}
 .footer-lang-slot{display:flex;align-items:center;gap:8px;}
 .footer-lang-label{font-size:11.5px;color:var(--muted);margin-inline-end:8px;}
+
+/* ============ CONFIRMATION MODAL ============ */
+.confirm-modal-overlay{position:fixed;inset:0;background:rgba(15,34,41,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;opacity:0;pointer-events:none;transition:.18s ease;}
+.confirm-modal-overlay.open{opacity:1;pointer-events:auto;}
+.confirm-modal{background:var(--paper-card);border-radius:var(--radius-md);box-shadow:var(--shadow-2);width:100%;max-width:440px;max-height:90vh;overflow-y:auto;transform:translateY(10px) scale(.98);transition:.18s ease;outline:none;}
+.confirm-modal-overlay.open .confirm-modal{transform:translateY(0) scale(1);}
+.confirm-modal-header{display:flex;align-items:flex-start;gap:12px;padding:20px 20px 0;}
+.confirm-modal-icon{width:40px;height:40px;border-radius:10px;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.confirm-modal-icon svg{width:20px;height:20px;}
+.confirm-modal.destructive .confirm-modal-icon{background:var(--error-soft);color:var(--error);}
+.confirm-modal-heading{flex:1;min-width:0;}
+.confirm-modal-title{font-size:16px;font-weight:700;margin:0;padding-top:8px;}
+.confirm-modal-close{width:30px;height:30px;border-radius:8px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.confirm-modal-close:hover{background:var(--surface-alt);}
+.confirm-modal-close svg{width:16px;height:16px;}
+.confirm-modal-body{padding:14px 20px 4px;}
+.confirm-modal-message{font-size:13.5px;color:var(--muted);line-height:1.7;margin:0 0 16px;}
+.confirm-item-card{background:var(--surface-alt);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;margin-bottom:6px;}
+.confirm-item-name{font-size:14px;font-weight:700;margin-bottom:10px;}
+.confirm-item-fields{display:flex;flex-direction:column;gap:9px;}
+.confirm-item-field{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12.5px;}
+.confirm-item-label{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0;}
+.confirm-item-value{color:var(--text);font-weight:600;text-align:end;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.confirm-modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:16px 20px 20px;}
+.confirm-modal.destructive #confirmModalConfirm{background:var(--error);}
+.confirm-modal.destructive #confirmModalConfirm:hover{background:#a53a33;}
+#confirmModalConfirm .spinner{display:none;width:14px;height:14px;border-width:2px;}
+.confirm-modal.is-loading #confirmModalConfirm .spinner{display:inline-block;}
+@media(max-width:480px){
+  .confirm-modal-footer{flex-direction:column-reverse;}
+  .confirm-modal-footer button{width:100%;}
+}
+
+/* ============ TOAST SYSTEM ============ */
+.toast-stack{position:fixed;top:20px;inset-inline-start:20px;z-index:1100;display:flex;flex-direction:column;gap:10px;max-width:360px;pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:10px;background:var(--paper-card);border:1px solid var(--line);border-inline-start:3px solid var(--muted);border-radius:var(--radius-sm);box-shadow:var(--shadow-2);padding:12px 14px;font-size:13px;color:var(--text);opacity:0;transform:translateY(-8px);transition:.2s ease;pointer-events:auto;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast-icon{width:18px;height:18px;flex-shrink:0;margin-top:1px;}
+.toast-icon svg{width:18px;height:18px;}
+.toast-message{flex:1;line-height:1.6;}
+.toast-close{background:none;border:none;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0;display:flex;}
+.toast-close svg{width:14px;height:14px;}
+.toast-success{border-inline-start-color:var(--success);}
+.toast-success .toast-icon{color:var(--success);}
+.toast-error{border-inline-start-color:var(--error);}
+.toast-error .toast-icon{color:var(--error);}
+.toast-warning{border-inline-start-color:#c9922e;}
+.toast-warning .toast-icon{color:#c9922e;}
+.toast-info{border-inline-start-color:var(--primary);}
+.toast-info .toast-icon{color:var(--primary);}

@@ -141,6 +141,7 @@
 <script>
     window.usersRoutes = {
         data: @json(route('admin.users.data')),
+        destroy: @json(route('admin.users.destroy', ['user' => '__ID__'])),
         exportExcel: @json(route('admin.users.export', 'excel')),
         exportCsv: @json(route('admin.users.export', 'csv')),
     };
@@ -154,8 +155,18 @@
         edit: @json(__('users.edit')),
         view: @json(__('users.view')),
         delete: @json(__('users.delete')),
+        cancel: @json(__('common.cancel')),
+        active: @json(__('users.active')),
+        inactive: @json(__('users.inactive')),
+        idLabel: @json(__('users.id')),
+        columnStatus: @json(__('users.column_status')),
         showingCount: @json(__('users.showing_count')),
+        confirmDeleteTitle: @json(__('users.confirm_delete_title')),
+        confirmDeleteMessage: @json(__('users.confirm_delete_message')),
+        deleteSuccess: @json(__('users.delete_success')),
+        deleteError: @json(__('users.delete_error')),
     };
 </script>
+<script src="{{ asset('assets/js/users-table.js') }}"></script>
 <script src="{{ asset('assets/js/users-table.js') }}"></script>
 @endpush

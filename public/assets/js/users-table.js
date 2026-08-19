@@ -99,7 +99,12 @@ document.addEventListener('DOMContentLoaded', function () {
             '<div class="gdropdown-menu" role="menu">' +
               '<div class="gdropdown-item" role="menuitem">' + (window.usersLabels ? usersLabels.edit : 'Edit') + '</div>' +
               '<div class="gdropdown-item" role="menuitem">' + (window.usersLabels ? usersLabels.view : 'View') + '</div>' +
-              '<div class="gdropdown-item destructive" role="menuitem">' + (window.usersLabels ? usersLabels.delete : 'Delete') + '</div>' +
+              '<div class="gdropdown-item destructive" role="menuitem" data-action="delete-user" ' +
+                'data-id="' + escapeHtml(user.id) + '" data-name="' + escapeHtml(user.name) + '" ' +
+                'data-email="' + escapeHtml(user.email) + '" data-status="' + escapeHtml(user.status) + '">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> ' +
+                (window.usersLabels ? usersLabels.delete : 'Delete') +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</td>' +
@@ -169,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tbody.innerHTML = response.data.map(renderRow).join('');
         tbody.querySelectorAll('.gdropdown').forEach(function (dd) { window.GlobalDropdown.init(dd); });
-
+        bindDeleteButtons();
         if (resultCount && response.meta) {
           var tpl = (window.usersLabels && usersLabels.showingCount) || 'Showing :from–:to of :total';
           resultCount.textContent = tpl
@@ -206,6 +211,62 @@ document.addEventListener('DOMContentLoaded', function () {
       if (window.GlobalDropdown) window.GlobalDropdown.closeAll();
     });
   });
+
+    // ---------- Delete (Confirmation Modal → XHR DELETE → refresh table) ----------
+  function deleteUser(id) {
+    return new Promise(function (resolve, reject) {
+      var url = usersRoutes.destroy.replace('__ID__', id);
+      var xhr = new XMLHttpRequest();
+      xhr.open('DELETE', url, true);
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+      if (csrfMeta) xhr.setRequestHeader('X-CSRF-TOKEN', csrfMeta.getAttribute('content'));
+
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== XMLHttpRequest.DONE) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          if (window.Toast) Toast.success((window.usersLabels && usersLabels.deleteSuccess) || 'Deleted successfully.');
+          fetchUsers();
+          resolve();
+        } else {
+          if (window.Toast) Toast.error((window.usersLabels && usersLabels.deleteError) || 'Unable to delete.');
+          reject(new Error('delete failed'));
+        }
+      };
+      xhr.send();
+    });
+  }
+
+ function bindDeleteButtons() {
+  tbody.querySelectorAll('[data-action="delete-user"]').forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
+      if (window.GlobalDropdown) window.GlobalDropdown.closeAll();
+
+      var labels = window.usersLabels || {};
+      var status = trigger.dataset.status;
+      var statusLabel = status === 'active' ? labels.active : labels.inactive;
+
+      window.ConfirmationModal.open({
+        type: 'delete',
+        title: labels.confirmDeleteTitle,
+        message: labels.confirmDeleteMessage,
+        item: {
+          name: trigger.dataset.name,
+          fields: [
+            { label: labels.idLabel || 'ID', value: '#' + trigger.dataset.id },
+            { label: 'Email', value: trigger.dataset.email },
+            { label: labels.columnStatus, value: statusLabel, badge: true, badgeType: status }
+          ]
+        },
+        confirmText: labels.delete,
+        cancelText: labels.cancel,
+        onConfirm: function () {
+          return deleteUser(trigger.dataset.id);
+        }
+      });
+    });
+  });
+}
 
   fetchUsers();
 });
