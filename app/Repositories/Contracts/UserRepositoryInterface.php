@@ -18,4 +18,10 @@ interface UserRepositoryInterface
      * Delete a user.
      */
     public function delete(User $user): bool;
+
+    /**
+     * Update a user's profile data. A non-empty 'password' key is re-hashed;
+     * an empty/missing password keeps the current one unchanged.
+     */
+    public function update(User $user, array $data): User;
 }

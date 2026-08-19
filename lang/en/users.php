@@ -50,4 +50,13 @@ return [
     'delete_error' => 'Unable to delete user.',
     'updated_at' => 'Last Updated',
     'back_to_list' => 'Back to Users',
+    'edit_title' => 'Edit User — :name',
+    'edit_subtitle' => 'Update this user\'s details below.',
+    'name' => 'Full Name',
+    'email' => 'Email',
+    'password_new' => 'New Password',
+    'password_hint' => 'Leave blank to keep the current password.',
+    'save' => 'Save changes',
+    'update_success' => 'User updated successfully.',
+    'update_error' => 'Unable to update the user.',
 ];

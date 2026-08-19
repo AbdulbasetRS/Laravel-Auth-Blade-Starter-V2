@@ -97,7 +97,10 @@ document.addEventListener('DOMContentLoaded', function () {
               '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>' +
             '</button>' +
             '<div class="gdropdown-menu" role="menu">' +
-              '<div class="gdropdown-item" role="menuitem">' + (window.usersLabels ? usersLabels.edit : 'Edit') + '</div>' +
+              '<a href="' + usersRoutes.edit.replace('__ID__', user.id) + '" class="gdropdown-item" role="menuitem">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg> ' +
+                (window.usersLabels ? usersLabels.edit : 'Edit') +
+              '</a>' +
               '<a href="' + usersRoutes.show.replace('__ID__', user.id) + '" class="gdropdown-item" role="menuitem">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' +
                 (window.usersLabels ? usersLabels.view : 'View') +

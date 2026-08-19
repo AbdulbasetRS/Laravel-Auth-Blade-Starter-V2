@@ -74,6 +74,27 @@ class UserController extends Controller
         return view('admin.users.show', ['user' => $user]);
     }
 
+    public function edit(User $user): View
+    {
+        return view('admin.users.edit', ['user' => $user]);
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'status' => ['required', 'in:active,inactive'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+
+        $this->users->update($user, $validated);
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('toast_success', __('users.update_success'));
+    }
+
     /**
      * Export placeholder. Wiring real Excel/CSV export needs the
      * maatwebsite/excel package (composer require maatwebsite/excel) —

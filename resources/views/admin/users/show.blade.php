@@ -13,6 +13,10 @@
                 <p>{{ $user->email }}</p>
             </div>
             <div class="view-user-actions">
+                <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-primary">
+                    <x-icon name="pencil" style="width:15px;height:15px;" />
+                    {{ __('users.edit') }}
+                </a>
                 <button type="button" class="btn btn-danger" id="viewUserDeleteBtn"
                         data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                         data-email="{{ $user->email }}" data-status="{{ $user->status }}">
@@ -69,6 +73,13 @@
 @endsection
 
 @push('scripts')
+<script>
+    @if(session('toast_success'))
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.Toast) Toast.success(@json(session('toast_success')));
+        });
+    @endif
+</script>
 <script>
     window.usersRoutes = {
         index: @json(route('admin.users.index')),

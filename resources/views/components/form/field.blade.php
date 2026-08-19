@@ -3,7 +3,7 @@
     Invalid state = red border + icon + popover (hover/click/tap), NEVER a
     permanent line of text under the input.
 --}}
-@props(['name', 'type' => 'text', 'label', 'toggle' => false])
+@props(['name', 'type' => 'text', 'label', 'toggle' => false, 'value' => null])
 @php $hasError = $errors->has($name); @endphp
 <div class="field vfield {{ $hasError ? 'has-error' : '' }}" data-field="{{ $name }}">
     <label for="{{ $name }}">{{ $label }}</label>
@@ -12,7 +12,7 @@
             type="{{ $type }}"
             id="{{ $name }}"
             name="{{ $name }}"
-            value="{{ old($name) }}"
+            value="{{ old($name, $value) }}"
             {{ $attributes }}
         >
         @if($toggle)
