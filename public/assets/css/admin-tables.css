@@ -82,7 +82,7 @@ table.data-table tr:hover td{background:var(--surface-alt);}
 
 .table-foot{display:flex;align-items:center;justify-content:center;padding:14px 16px;border-top:1px solid var(--line);flex-wrap:wrap;}
 .pagination{display:flex;align-items:center;gap:4px;}
-.page-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--paper-card);color:var(--text);font-size:12.5px;font-family:'IBM Plex Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.page-btn{width:32px;height:38px;border-radius:8px;border:1px solid var(--line);background:var(--paper-card);color:var(--text);font-size:12.5px;font-family:'IBM Plex Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
 .page-btn:hover{background:var(--surface-alt);}
 .page-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:700;}
 .page-btn:disabled{opacity:.4;cursor:default;}
