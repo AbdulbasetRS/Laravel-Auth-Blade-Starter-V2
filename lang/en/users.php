@@ -48,4 +48,6 @@ return [
     'confirm_delete_message' => 'Are you sure you want to delete this user? This action cannot be undone.',
     'delete_success' => 'User deleted successfully.',
     'delete_error' => 'Unable to delete user.',
+    'updated_at' => 'Last Updated',
+    'back_to_list' => 'Back to Users',
 ];

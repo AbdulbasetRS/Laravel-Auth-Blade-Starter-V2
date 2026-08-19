@@ -141,6 +141,7 @@
 <script>
     window.usersRoutes = {
         data: @json(route('admin.users.data')),
+        show: @json(route('admin.users.show', ['user' => '__ID__'])),
         destroy: @json(route('admin.users.destroy', ['user' => '__ID__'])),
         exportExcel: @json(route('admin.users.export', 'excel')),
         exportCsv: @json(route('admin.users.export', 'csv')),

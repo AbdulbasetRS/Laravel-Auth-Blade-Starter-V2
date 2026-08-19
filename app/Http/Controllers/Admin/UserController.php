@@ -69,6 +69,11 @@ class UserController extends Controller
         ]);
     }
 
+    public function show(User $user): View
+    {
+        return view('admin.users.show', ['user' => $user]);
+    }
+
     /**
      * Export placeholder. Wiring real Excel/CSV export needs the
      * maatwebsite/excel package (composer require maatwebsite/excel) —

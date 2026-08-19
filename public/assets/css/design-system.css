@@ -145,3 +145,6 @@ a{color:inherit;}
 .toast-warning .toast-icon{color:#c9922e;}
 .toast-info{border-inline-start-color:var(--primary);}
 .toast-info .toast-icon{color:var(--primary);}
+
+.btn-danger{background:var(--error);color:#fff;}
+.btn-danger:hover{background:#a53a33;}

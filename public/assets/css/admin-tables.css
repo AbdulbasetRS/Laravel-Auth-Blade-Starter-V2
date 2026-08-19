@@ -162,3 +162,17 @@ table.data-table tr:hover td{background:var(--surface-alt);}
 
   .badge,.verified-yes,.verified-no{color:#000 !important;}
 }
+
+/* ---- View User page ---- */
+.view-user-card{background:var(--paper-card);border:1px solid var(--line);border-radius:var(--radius-md);padding:26px;max-width:640px;margin:0 auto;}
+.view-user-header{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:20px;flex-wrap:wrap;}
+.view-user-avatar{width:56px;height:56px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;}
+.view-user-heading{flex:1;min-width:160px;}
+.view-user-heading h2{font-size:17px;margin:0 0 4px;}
+.view-user-heading p{font-size:13px;color:var(--muted);margin:0;}
+.view-user-actions{display:flex;gap:10px;}
+.view-user-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-bottom:24px;}
+.view-user-field{display:flex;flex-direction:column;gap:6px;}
+.view-user-label{font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.view-user-value{font-size:14px;font-weight:600;color:var(--text);}
+.view-user-back{display:inline-block;}

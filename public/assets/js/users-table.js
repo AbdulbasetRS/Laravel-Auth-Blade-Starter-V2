@@ -98,7 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
             '</button>' +
             '<div class="gdropdown-menu" role="menu">' +
               '<div class="gdropdown-item" role="menuitem">' + (window.usersLabels ? usersLabels.edit : 'Edit') + '</div>' +
-              '<div class="gdropdown-item" role="menuitem">' + (window.usersLabels ? usersLabels.view : 'View') + '</div>' +
+              '<a href="' + usersRoutes.show.replace('__ID__', user.id) + '" class="gdropdown-item" role="menuitem">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' +
+                (window.usersLabels ? usersLabels.view : 'View') +
+              '</a>' +
               '<div class="gdropdown-item destructive" role="menuitem" data-action="delete-user" ' +
                 'data-id="' + escapeHtml(user.id) + '" data-name="' + escapeHtml(user.name) + '" ' +
                 'data-email="' + escapeHtml(user.email) + '" data-status="' + escapeHtml(user.status) + '">' +

@@ -36,6 +36,7 @@ Route::group([
                 Route::post('/', [UserController::class, 'store'])->name('store');
                 Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
                 Route::get('/export/{format}', [UserController::class, 'export'])->name('export'); // excel|csv
+                Route::get('/{user}', [UserController::class, 'show'])->name('show');
             });
         });
     });
