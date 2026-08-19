@@ -1,4 +1,4 @@
-.login-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;}
+.login-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow: clip;}
 @media(max-width:860px){.login-wrap{grid-template-columns:1fr;}}
 .login-brand-panel{background:linear-gradient(155deg, var(--ink) 0%, var(--ink-2) 60%, #1c4038 100%);color:#EAF2F1;display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden;}
 @media(max-width:860px){.login-brand-panel{display:none;}}
