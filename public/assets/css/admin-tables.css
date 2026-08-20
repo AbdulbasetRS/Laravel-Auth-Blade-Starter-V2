@@ -57,7 +57,7 @@
 .result-count{font-size:12.5px;color:var(--muted);}
 
 /* ---- Data table ---- */
-.data-table-wrap{background:var(--paper-card);border:1px solid var(--line);border-radius:var(--radius-md);overflow:hidden;}
+.data-table-wrap{background:var(--paper-card);border:1px solid var(--line);border-radius:var(--radius-md);overflow:visible;}
 table.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
 table.data-table thead th:first-child{border-top-left-radius:var(--radius-md);}
 table.data-table thead th:last-child{border-top-right-radius:var(--radius-md);}
