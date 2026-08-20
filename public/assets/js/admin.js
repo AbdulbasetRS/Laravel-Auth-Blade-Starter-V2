@@ -95,16 +95,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ---------- Custom date picker (calendar dialog, replaces free-text date input) ----------
-  function positionCalendar(root) {
-    var menu = root.querySelector('.date-field-popover');
-    var triggerRect = root.getBoundingClientRect();
-    var menuHeight = menu.offsetHeight;
-    var margin = 16;
-    var spaceBelow = window.innerHeight - triggerRect.bottom;
-    var spaceAbove = triggerRect.top;
-    var needsFlip = spaceBelow < (menuHeight + margin) && spaceAbove > spaceBelow;
-    root.classList.toggle('open-up', needsFlip);
-  }
   function closeAllDatePickers(except) {
     document.querySelectorAll('.date-field.open').forEach(function (f) {
       if (f !== except) {
@@ -144,7 +134,6 @@ document.addEventListener('DOMContentLoaded', function () {
       var willOpen = !root.classList.contains('open');
       closeAllDatePickers(root);
       if (window.GlobalDropdown) window.GlobalDropdown.closeAll();
-      if (willOpen) positionCalendar(root);
       root.classList.toggle('open', willOpen);
       trigger.setAttribute('aria-expanded', String(willOpen));
     });

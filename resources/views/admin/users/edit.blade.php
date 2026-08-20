@@ -23,7 +23,7 @@
 
             <div class="field">
                 <label for="status">{{ __('users.status') }}</label>
-                <x-dropdown id="editStatusDropdown" variant="light" :select-style="true">
+                <x-dropdown id="editStatusDropdown" variant="light" :select-style="true" class="open-up">
                     <x-slot:trigger>
                         <span class="select-value">{{ old('status', $user->status) === 'active' ? __('users.active') : __('users.inactive') }}</span>
                     </x-slot:trigger>

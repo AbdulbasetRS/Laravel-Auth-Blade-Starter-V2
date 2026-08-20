@@ -71,6 +71,11 @@ class UserRepository implements UserRepositoryInterface
         return (bool) $user->delete();
     }
 
+    public function store(array $data): User
+    {
+        return User::create($data);
+    }
+
     public function update(User $user, array $data): User
     {
         $password = $data['password'] ?? null;

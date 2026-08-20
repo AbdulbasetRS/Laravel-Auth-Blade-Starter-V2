@@ -42,7 +42,6 @@ return [
     'view' => 'View',
     'delete' => 'Delete',
     'showing_count' => 'Showing :from–:to of :total users',
-    'create_placeholder' => 'The Create User form will be built in a separately approved pass.',
     'id' => 'ID',
     'confirm_delete_title' => 'Delete User',
     'confirm_delete_message' => 'Are you sure you want to delete this user? This action cannot be undone.',
@@ -59,4 +58,10 @@ return [
     'save' => 'Save changes',
     'update_success' => 'User updated successfully.',
     'update_error' => 'Unable to update the user.',
+    'create_title' => 'Create User',
+    'create_subtitle' => 'Add a new user to the system.',
+    'password_label' => 'Password',
+    'create_user' => 'Create user',
+    'create_success' => 'User created successfully.',
+    'create_error' => 'Unable to create the user.',
 ];

@@ -12,6 +12,9 @@ use App\Exports\UsersExport;
 use Maatwebsite\Excel\Excel as ExcelFormat;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\User;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
@@ -35,7 +38,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Users retrieved successfully.',
-            'data' => $users->items(),
+            'data' => UserResource::collection($users->items()),
             'meta' => [
                 'current_page' => $users->currentPage(),
                 'last_page' => $users->lastPage(),
@@ -51,11 +54,17 @@ class UserController extends Controller
         return view('admin.users.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreUserRequest $request): JsonResponse|RedirectResponse
     {
-        // Intentionally left minimal — Create User form/validation is a
-        // separate approved requirement, not part of this implementation pass.
-        return redirect()->route('admin.users.index');
+        $user = $this->users->store($request->validated());
+
+        if ($request->wantsJson()) {
+            return UserResource::make($user)->response()->setStatusCode(201);
+        }
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('toast_success', __('users.create_success'));
     }
 
     /** Server-side is the source of truth — the modal's item details are for visual review only. */
@@ -79,16 +88,9 @@ class UserController extends Controller
         return view('admin.users.edit', ['user' => $user]);
     }
 
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
-            'status' => ['required', 'in:active,inactive'],
-            'password' => ['nullable', 'string', 'min:8'],
-        ]);
-
-        $this->users->update($user, $validated);
+        $this->users->update($user, $request->validated());
 
         return redirect()
             ->route('admin.users.show', $user)

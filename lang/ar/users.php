@@ -43,7 +43,6 @@ return [
     'view' => 'عرض',
     'delete' => 'حذف',
     'showing_count' => 'عرض :from–:to من أصل :total مستخدم',
-    'create_placeholder' => 'نموذج إنشاء المستخدم سيُبنى في مرحلة لاحقة معتمدة بشكل منفصل.',
     'id' => 'المعرف',
     'confirm_delete_title' => 'حذف المستخدم',
     'confirm_delete_message' => 'هل أنت متأكد أنك تريد حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.',
@@ -60,4 +59,10 @@ return [
     'save' => 'حفظ التغييرات',
     'update_success' => 'تم تحديث المستخدم بنجاح.',
     'update_error' => 'تعذّر تحديث المستخدم.',
+    'create_title' => 'إنشاء مستخدم',
+    'create_subtitle' => 'أضف مستخدمًا جديدًا إلى النظام.',
+    'password_label' => 'كلمة المرور',
+    'create_user' => 'إنشاء مستخدم',
+    'create_success' => 'تم إنشاء المستخدم بنجاح.',
+    'create_error' => 'تعذّر إنشاء المستخدم.',
 ];
