@@ -33,13 +33,18 @@ class UserRepository implements UserRepositoryInterface
         if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                $q->where('username', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('mobile_number', 'like', "%{$search}%");
             });
         }
 
         if (! empty($filters['status']) && $filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['type']) && $filters['type'] !== 'all') {
+            $query->where('type', $filters['type']);
         }
 
         if (! empty($filters['verified'])) {
@@ -57,10 +62,10 @@ class UserRepository implements UserRepositoryInterface
         }
 
         match ($filters['sort'] ?? 'newest') {
-            'oldest' => $query->oldest(),
-            'name_asc' => $query->orderBy('name', 'asc'),
-            'name_desc' => $query->orderBy('name', 'desc'),
-            default => $query->latest(),
+            'oldest'    => $query->oldest(),
+            'name_asc'  => $query->orderBy('username', 'asc'),
+            'name_desc' => $query->orderBy('username', 'desc'),
+            default     => $query->latest(),
         };
 
         return $query;

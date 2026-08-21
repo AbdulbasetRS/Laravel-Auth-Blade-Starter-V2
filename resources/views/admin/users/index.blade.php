@@ -16,7 +16,7 @@
             <button type="button" class="gdropdown-trigger light filters-toggle-btn" id="filtersToggleBtn" aria-expanded="false" aria-controls="filtersAccordion">
                 <x-icon name="columns" style="width:15px;height:15px;" />
                 <span>{{ __('users.filters') }}</span>
-                <span class="filter-badge-count">2</span>
+                <span class="filter-badge-count">3</span>
                 <x-icon name="chevron-down" class="chev" />
             </button>
         </div>
@@ -29,8 +29,20 @@
                     <x-dropdown variant="light" :select-style="true" data-filter="status">
                         <x-slot:trigger><span class="select-value">{{ __('users.all_statuses') }}</span></x-slot:trigger>
                         <x-dropdown-item selected data-value="all">{{ __('users.all_statuses') }}</x-dropdown-item>
-                        <x-dropdown-item data-value="active">{{ __('users.active') }}</x-dropdown-item>
-                        <x-dropdown-item data-value="inactive">{{ __('users.inactive') }}</x-dropdown-item>
+                        @foreach(\App\Enums\UserStatus::cases() as $status)
+                            <x-dropdown-item data-value="{{ $status->value }}">{{ $status->label() }}</x-dropdown-item>
+                        @endforeach
+                    </x-dropdown>
+                </div>
+
+                <div class="filter-field">
+                    <label>{{ __('users.type') }}</label>
+                    <x-dropdown variant="light" :select-style="true" data-filter="type">
+                        <x-slot:trigger><span class="select-value">{{ __('users.all_types') }}</span></x-slot:trigger>
+                        <x-dropdown-item selected data-value="all">{{ __('users.all_types') }}</x-dropdown-item>
+                        @foreach(\App\Enums\UserType::cases() as $type)
+                            <x-dropdown-item data-value="{{ $type->value }}">{{ $type->label() }}</x-dropdown-item>
+                        @endforeach
                     </x-dropdown>
                 </div>
 
@@ -104,6 +116,7 @@
                 <x-slot:trigger><x-icon name="columns" style="width:15px;height:15px;" /><span>{{ __('users.columns') }}</span></x-slot:trigger>
                 <label class="gdropdown-item checkbox-item"><input type="checkbox" checked data-column="user"> {{ __('users.column_user') }}</label>
                 <label class="gdropdown-item checkbox-item"><input type="checkbox" checked data-column="status"> {{ __('users.column_status') }}</label>
+                <label class="gdropdown-item checkbox-item"><input type="checkbox" checked data-column="type"> {{ __('users.column_type') }}</label>
                 <label class="gdropdown-item checkbox-item"><input type="checkbox" checked data-column="verified"> {{ __('users.column_verified') }}</label>
                 <label class="gdropdown-item checkbox-item"><input type="checkbox" checked data-column="joined"> {{ __('users.column_joined') }}</label>
             </x-dropdown>
@@ -121,13 +134,14 @@
                 <tr>
                     <th data-col="user">{{ __('users.column_user') }}</th>
                     <th data-col="status">{{ __('users.column_status') }}</th>
+                    <th data-col="type">{{ __('users.column_type') }}</th>
                     <th data-col="verified">{{ __('users.column_verified') }}</th>
                     <th data-col="joined">{{ __('users.column_joined') }}</th>
                     <th data-col="actions"></th>
                 </tr>
             </thead>
             <tbody id="usersTableBody">
-                <tr class="table-state-row"><td colspan="5">{{ __('users.loading') }}</td></tr>
+                <tr class="table-state-row"><td colspan="6">{{ __('users.loading') }}</td></tr>
             </tbody>
         </table>
         <div class="table-foot">
@@ -158,10 +172,9 @@
         view: @json(__('users.view')),
         delete: @json(__('users.delete')),
         cancel: @json(__('common.cancel')),
-        active: @json(__('users.active')),
-        inactive: @json(__('users.inactive')),
         idLabel: @json(__('users.id')),
         columnStatus: @json(__('users.column_status')),
+        columnType: @json(__('users.column_type')),
         showingCount: @json(__('users.showing_count')),
         confirmDeleteTitle: @json(__('users.confirm_delete_title')),
         confirmDeleteMessage: @json(__('users.confirm_delete_message')),
@@ -169,6 +182,5 @@
         deleteError: @json(__('users.delete_error')),
     };
 </script>
-<script src="{{ asset('assets/js/users-table.js') }}"></script>
 <script src="{{ asset('assets/js/users-table.js') }}"></script>
 @endpush

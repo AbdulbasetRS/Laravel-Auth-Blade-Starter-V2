@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\UserStatus;
+use App\Enums\UserType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +15,25 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('username')->unique();
+            $table->string('slug')->unique();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('mobile_number')->unique();
+            $table->string('national_id')->unique()->nullable();
+            $table->string('nationality')->nullable();
+            $table->string('passport_number')->unique()->nullable();
             $table->string('password');
+            $table->enum('status', UserStatus::values())->default(UserStatus::PENDING->value);
+            $table->enum('type', UserType::values())->default(UserType::USER->value);
+            $table->unsignedInteger('credits')->default(0);
+            $table->boolean('can_login')->default(true);
+            $table->text('status_details')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('role_id')->nullable();
+            $table->text('fcm_token')->nullable();
             $table->rememberToken();
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->timestamps();
         });
 

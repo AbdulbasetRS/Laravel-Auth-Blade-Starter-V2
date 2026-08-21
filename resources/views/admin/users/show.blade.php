@@ -3,13 +3,23 @@
 @section('page-title', __('navigation.users'))
 @section('title', __('users.view'))
 
+@php
+    $statusEnum = ($user->status instanceof \App\Enums\UserStatus)
+        ? $user->status
+        : \App\Enums\UserStatus::tryFrom((string) $user->status);
+
+    $typeEnum = ($user->type instanceof \App\Enums\UserType)
+        ? $user->type
+        : \App\Enums\UserType::tryFrom((string) $user->type);
+@endphp
+
 @section('content')
 <div class="inner-body">
     <div class="view-user-card">
         <div class="view-user-header">
-            <div class="view-user-avatar">{{ \Illuminate\Support\Str::of($user->name)->substr(0, 1) }}</div>
+            <div class="view-user-avatar">{{ \Illuminate\Support\Str::of($user->username)->substr(0, 1)->upper() }}</div>
             <div class="view-user-heading">
-                <h2>{{ $user->name }}</h2>
+                <h2>{{ $user->username }}</h2>
                 <p>{{ $user->email }}</p>
             </div>
             <div class="view-user-actions">
@@ -18,8 +28,10 @@
                     {{ __('users.edit') }}
                 </a>
                 <button type="button" class="btn btn-danger" id="viewUserDeleteBtn"
-                        data-id="{{ $user->id }}" data-name="{{ $user->name }}"
-                        data-email="{{ $user->email }}" data-status="{{ $user->status }}">
+                        data-id="{{ $user->id }}"
+                        data-name="{{ $user->username }}"
+                        data-email="{{ $user->email }}"
+                        data-status="{{ $user->status instanceof \App\Enums\UserStatus ? $user->status->value : $user->status }}">
                     <x-icon name="trash" style="width:15px;height:15px;" />
                     {{ __('users.delete') }}
                 </button>
@@ -27,22 +39,79 @@
         </div>
 
         <div class="view-user-grid">
+            {{-- ID --}}
             <div class="view-user-field">
                 <span class="view-user-label">{{ __('users.id') }}</span>
                 <span class="view-user-value">#{{ $user->id }}</span>
             </div>
 
+            {{-- Status --}}
             <div class="view-user-field">
                 <span class="view-user-label">{{ __('users.column_status') }}</span>
                 <span class="view-user-value">
-                    @if($user->status === 'active')
-                        <span class="badge active"><span class="badge-dot"></span>{{ __('users.active') }}</span>
+                    @if($statusEnum)
+                        <span class="badge {{ $statusEnum->color() }}">
+                            <span class="badge-dot"></span>{{ $statusEnum->label() }}
+                        </span>
                     @else
-                        <span class="badge inactive"><span class="badge-dot"></span>{{ __('users.inactive') }}</span>
+                        <span class="badge secondary">{{ $user->status ?? '—' }}</span>
                     @endif
                 </span>
             </div>
 
+            {{-- Type --}}
+            <div class="view-user-field">
+                <span class="view-user-label">{{ __('users.column_type') }}</span>
+                <span class="view-user-value">
+                    @if($typeEnum)
+                        <span class="badge {{ $typeEnum->color() }}">{{ $typeEnum->label() }}</span>
+                    @else
+                        <span class="badge secondary">{{ $user->type ?? '—' }}</span>
+                    @endif
+                </span>
+            </div>
+
+            {{-- Mobile --}}
+            <div class="view-user-field">
+                <span class="view-user-label">{{ __('users.mobile_number') }}</span>
+                <span class="view-user-value">{{ $user->mobile_number ?? '—' }}</span>
+            </div>
+
+            {{-- National ID --}}
+            @if($user->national_id)
+            <div class="view-user-field">
+                <span class="view-user-label">{{ __('users.national_id') }}</span>
+                <span class="view-user-value">{{ $user->national_id }}</span>
+            </div>
+            @endif
+
+            {{-- Nationality --}}
+            @if($user->nationality)
+            <div class="view-user-field">
+                <span class="view-user-label">{{ __('users.nationality') }}</span>
+                <span class="view-user-value">{{ $user->nationality }}</span>
+            </div>
+            @endif
+
+            {{-- Credits --}}
+            <div class="view-user-field">
+                <span class="view-user-label">{{ __('users.credits') }}</span>
+                <span class="view-user-value">{{ number_format($user->credits) }}</span>
+            </div>
+
+            {{-- Can Login --}}
+            <div class="view-user-field">
+                <span class="view-user-label">{{ __('users.can_login') }}</span>
+                <span class="view-user-value">
+                    @if($user->can_login)
+                        <span class="verified-yes"><x-icon name="check" style="width:14px;height:14px;" />{{ __('users.yes') }}</span>
+                    @else
+                        <span class="verified-no"><x-icon name="x" style="width:14px;height:14px;" />{{ __('users.no') }}</span>
+                    @endif
+                </span>
+            </div>
+
+            {{-- Verified --}}
             <div class="view-user-field">
                 <span class="view-user-label">{{ __('users.column_verified') }}</span>
                 <span class="view-user-value">
@@ -54,11 +123,21 @@
                 </span>
             </div>
 
+            {{-- Status Details --}}
+            @if($user->status_details)
+            <div class="view-user-field" style="grid-column: 1 / -1;">
+                <span class="view-user-label">{{ __('users.status_details') }}</span>
+                <span class="view-user-value">{{ $user->status_details }}</span>
+            </div>
+            @endif
+
+            {{-- Joined --}}
             <div class="view-user-field">
                 <span class="view-user-label">{{ __('users.column_joined') }}</span>
                 <span class="view-user-value">{{ optional($user->created_at)->format('Y-m-d') }}</span>
             </div>
 
+            {{-- Updated At --}}
             <div class="view-user-field">
                 <span class="view-user-label">{{ __('users.updated_at') }}</span>
                 <span class="view-user-value">{{ optional($user->updated_at)->format('Y-m-d') }}</span>
@@ -88,8 +167,6 @@
     window.usersLabels = {
         cancel: @json(__('common.cancel')),
         delete: @json(__('users.delete')),
-        active: @json(__('users.active')),
-        inactive: @json(__('users.inactive')),
         idLabel: @json(__('users.id')),
         columnStatus: @json(__('users.column_status')),
         confirmDeleteTitle: @json(__('users.confirm_delete_title')),
