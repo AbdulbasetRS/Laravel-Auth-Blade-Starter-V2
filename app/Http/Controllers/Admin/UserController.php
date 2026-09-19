@@ -104,6 +104,8 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
+        $user->load(['profile', 'createdBy', 'updatedBy']);
+
         return view('admin.users.show', ['user' => $user]);
     }
 
