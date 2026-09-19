@@ -7,6 +7,9 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -76,9 +79,46 @@ class UserRepository implements UserRepositoryInterface
         return (bool) $user->delete();
     }
 
+    /**
+     * Create a new user along with their profile and optional avatar.
+     * Password is hashed automatically via the model's 'hashed' cast.
+     * Slug is auto-generated from username.
+     */
     public function store(array $data): User
     {
-        return User::create($data);
+        $profileData = $data['profile'] ?? [];
+        unset($data['profile']);
+
+        // Auto-generate a unique slug from username
+        $data['slug'] = $this->generateUniqueSlug($data['username'] ?? '');
+
+        // Track who created the record
+        $actorId = Auth::id();
+        $data['created_by'] = $actorId;
+        $data['updated_by'] = $actorId;
+
+        // Handle avatar file upload — stored separately, path goes on the profile
+        $avatarPath = null;
+        if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
+            $avatarPath = $data['avatar']->store('avatars', 'public');
+            unset($data['avatar']);
+        } else {
+            unset($data['avatar']);
+        }
+
+        $user = User::create($data);
+
+        // Create the linked profile record
+        $profileData['user_id']    = $user->id;
+        $profileData['created_by'] = $actorId;
+        $profileData['updated_by'] = $actorId;
+        if ($avatarPath !== null) {
+            $profileData['avatar'] = $avatarPath;
+        }
+
+        $user->profile()->create($profileData);
+
+        return $user->fresh(['profile']);
     }
 
     public function update(User $user, array $data): User
@@ -96,5 +136,22 @@ class UserRepository implements UserRepositoryInterface
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * Generate a unique slug by appending a numeric suffix when collisions occur.
+     */
+    protected function generateUniqueSlug(string $base): string
+    {
+        $slug      = Str::slug($base);
+        $candidate = $slug;
+        $counter   = 1;
+
+        while (User::where('slug', $candidate)->exists()) {
+            $candidate = $slug . '-' . $counter;
+            $counter++;
+        }
+
+        return $candidate;
     }
 }

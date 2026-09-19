@@ -14,6 +14,15 @@ class UpdateUserRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->exists('can_login')) {
+            $this->merge([
+                'can_login' => filter_var($this->input('can_login'), FILTER_VALIDATE_BOOLEAN),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         $userId = $this->route('user')->id;

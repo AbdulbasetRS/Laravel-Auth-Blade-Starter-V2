@@ -1,9 +1,13 @@
 /**
  * Global Validation Popover Controller — hover on desktop, click/tap on
  * mobile & keyboard. Works for both server-rendered errors (page load) and
- * XHR 422 responses that add .has-error + a popover to a field afterward.
+ * XHR 422 responses that add .has-error / .has-success + a popover afterward.
  */
 (function () {
+  function hasMessage(field) {
+    return field.classList.contains('has-error') || field.classList.contains('has-success');
+  }
+
   function closeAll(except) {
     document.querySelectorAll('.vfield.popover-open').forEach(function (f) {
       if (f !== except) { f.classList.remove('popover-open'); f.dataset.pinned = ''; }
@@ -16,14 +20,14 @@
     btn.dataset.validationInit = 'true';
 
     btn.addEventListener('mouseenter', function () {
-      if (field.classList.contains('has-error')) field.classList.add('popover-open');
+      if (hasMessage(field)) field.classList.add('popover-open');
     });
     btn.addEventListener('mouseleave', function () {
       if (field.dataset.pinned !== 'true') field.classList.remove('popover-open');
     });
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      if (!field.classList.contains('has-error')) return;
+      if (!hasMessage(field)) return;
       var wasPinned = field.dataset.pinned === 'true';
       closeAll(field);
       if (wasPinned) {

@@ -67,6 +67,30 @@ class UserController extends Controller
             ->with('toast_success', __('users.create_success'));
     }
 
+    /**
+     * XHR availability check — used by the Create User wizard to give instant
+     * feedback on unique fields (username, email, mobile, national_id, passport).
+     *
+     * GET /admin/users/check-availability?field=username&value=abdulbaset
+     *
+     * Returns: { available: true|false }
+     */
+    public function checkAvailability(Request $request): JsonResponse
+    {
+        $allowedFields = ['username', 'email', 'mobile_number', 'national_id', 'passport_number'];
+
+        $field = $request->input('field');
+        $value = (string) $request->input('value', '');
+
+        if (! in_array($field, $allowedFields, true) || $value === '') {
+            return response()->json(['available' => true]);
+        }
+
+        $taken = User::where($field, $value)->exists();
+
+        return response()->json(['available' => ! $taken]);
+    }
+
     /** Server-side is the source of truth — the modal's item details are for visual review only. */
     public function destroy(User $user): JsonResponse
     {
