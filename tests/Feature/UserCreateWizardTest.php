@@ -143,6 +143,10 @@ class UserCreateWizardTest extends TestCase
         $this->assertEquals('Doe', $createdUser->profile->last_name);
         $this->assertEquals('male', $createdUser->profile->gender);
         $this->assertNotNull($createdUser->profile->avatar);
+        $this->assertMatchesRegularExpression(
+            '#^users/'.$createdUser->id.'/avatars/user_avatar_'.$createdUser->id.'_\d{8}_\d+_[\w]+\.png$#',
+            $createdUser->profile->avatar
+        );
 
         Storage::disk('public')->assertExists($createdUser->profile->avatar);
     }

@@ -2,13 +2,15 @@
 
 namespace App\Repositories;
 
+use App\Helpers\FileNameGenerator;
+use App\Helpers\StoragePath;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserRepository implements UserRepositoryInterface
@@ -83,11 +85,18 @@ class UserRepository implements UserRepositoryInterface
      * Create a new user along with their profile and optional avatar.
      * Password is hashed automatically via the model's 'hashed' cast.
      * Slug is auto-generated from username.
+     * Avatar is stored after the user exists so the path can include the user id.
      */
     public function store(array $data): User
     {
         $profileData = $data['profile'] ?? [];
         unset($data['profile']);
+
+        $avatarFile = null;
+        if (isset($data['avatar']) && $data['avatar'] instanceof UploadedFile) {
+            $avatarFile = $data['avatar'];
+        }
+        unset($data['avatar']);
 
         // Auto-generate a unique slug from username
         $data['slug'] = $this->generateUniqueSlug($data['username'] ?? '');
@@ -97,24 +106,17 @@ class UserRepository implements UserRepositoryInterface
         $data['created_by'] = $actorId;
         $data['updated_by'] = $actorId;
 
-        // Handle avatar file upload — stored separately, path goes on the profile
-        $avatarPath = null;
-        if (isset($data['avatar']) && $data['avatar'] instanceof \Illuminate\Http\UploadedFile) {
-            $avatarPath = $data['avatar']->store('avatars', 'public');
-            unset($data['avatar']);
-        } else {
-            unset($data['avatar']);
-        }
-
         $user = User::create($data);
+
+        // Store avatar under users/{id}/avatars with the standard file name pattern
+        if ($avatarFile !== null) {
+            $profileData['avatar'] = $this->storeUserAvatar($user, $avatarFile);
+        }
 
         // Create the linked profile record
         $profileData['user_id']    = $user->id;
         $profileData['created_by'] = $actorId;
         $profileData['updated_by'] = $actorId;
-        if ($avatarPath !== null) {
-            $profileData['avatar'] = $avatarPath;
-        }
 
         $user->profile()->create($profileData);
 
@@ -139,6 +141,18 @@ class UserRepository implements UserRepositoryInterface
     }
 
     /**
+     * Store a user avatar using StoragePath + FileNameGenerator conventions.
+     * Returns the relative public-disk path (e.g. users/15/avatars/user_avatar_15_….jpg).
+     */
+    protected function storeUserAvatar(User $user, UploadedFile $file): string
+    {
+        $directory = StoragePath::userAvatar($user->id);
+        $filename  = FileNameGenerator::makeFromFile('user', 'avatar', $user->id, $file);
+
+        return $file->storeAs($directory, $filename, 'public');
+    }
+
+    /**
      * Generate a unique slug by appending a numeric suffix when collisions occur.
      */
     protected function generateUniqueSlug(string $base): string
@@ -148,7 +162,7 @@ class UserRepository implements UserRepositoryInterface
         $counter   = 1;
 
         while (User::where('slug', $candidate)->exists()) {
-            $candidate = $slug . '-' . $counter;
+            $candidate = $slug.'-'.$counter;
             $counter++;
         }
 
