@@ -125,9 +125,21 @@ class UserRepository implements UserRepositoryInterface
 
     public function update(User $user, array $data): User
     {
+        $profileData = $data['profile'] ?? [];
+        unset($data['profile']);
+
+        $avatarFile = $data['avatar'] ?? null;
+        unset($data['avatar']);
+
+        $removeAvatar = (bool) ($data['remove_avatar'] ?? false);
+        unset($data['remove_avatar']);
+
         $password = $data['password'] ?? null;
 
         unset($data['password']);
+
+        $actorId = Auth::id();
+        $data['updated_by'] = $actorId;
 
         $user->fill($data);
 
@@ -137,7 +149,23 @@ class UserRepository implements UserRepositoryInterface
 
         $user->save();
 
-        return $user;
+        if ($avatarFile instanceof UploadedFile) {
+            $profileData['avatar'] = $this->storeUserAvatar($user, $avatarFile);
+        } elseif ($removeAvatar) {
+            $profileData['avatar'] = null;
+        }
+
+        if ($profileData !== [] || $avatarFile instanceof UploadedFile) {
+            $profileData['updated_by'] = $actorId;
+            $profile = $user->profile;
+            if ($profile) {
+                $profile->update($profileData);
+            } else {
+                $user->profile()->create($profileData + ['created_by' => $actorId]);
+            }
+        }
+
+        return $user->fresh(['profile']);
     }
 
     /**

@@ -71,7 +71,7 @@ class UserController extends Controller
      * XHR availability check — used by the Create User wizard to give instant
      * feedback on unique fields (username, email, mobile, national_id, passport).
      *
-     * GET /admin/users/check-availability?field=username&value=abdulbaset
+     * GET /admin/users/check-availability?field=username&value=abdulbaset&ignore_user=106
      *
      * Returns: { available: true|false }
      */
@@ -86,7 +86,13 @@ class UserController extends Controller
             return response()->json(['available' => true]);
         }
 
-        $taken = User::where($field, $value)->exists();
+        $query = User::where($field, $value);
+        $ignoreUserId = $request->integer('ignore_user');
+        if ($ignoreUserId > 0) {
+            $query->where('id', '!=', $ignoreUserId);
+        }
+
+        $taken = $query->exists();
 
         return response()->json(['available' => ! $taken]);
     }
@@ -111,12 +117,18 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
+        $user->loadMissing('profile');
+
         return view('admin.users.edit', ['user' => $user]);
     }
 
-    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse|RedirectResponse
     {
-        $this->users->update($user, $request->validated());
+        $user = $this->users->update($user, $request->validated());
+
+        if ($request->wantsJson()) {
+            return UserResource::make($user)->response();
+        }
 
         return redirect()
             ->route('admin.users.show', $user)

@@ -28,15 +28,11 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       if (!hasMessage(field)) return;
-      var wasPinned = field.dataset.pinned === 'true';
       closeAll(field);
-      if (wasPinned) {
-        field.classList.remove('popover-open');
-        field.dataset.pinned = '';
-      } else {
-        field.classList.add('popover-open');
-        field.dataset.pinned = 'true';
-      }
+      // A validation message is feedback, not a toggle. Keep it open on
+      // every click until the user clicks elsewhere or the field changes.
+      field.classList.add('popover-open');
+      field.dataset.pinned = 'true';
     });
     btn.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {

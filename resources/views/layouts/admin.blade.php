@@ -40,7 +40,7 @@
 <x-toast-container />
 
 <script src="{{ asset('assets/js/dropdown.js') }}"></script>
-<script src="{{ asset('assets/js/validation.js') }}"></script>
+<script src="{{ asset('assets/js/validation.js') }}?v={{ filemtime(public_path('assets/js/validation.js')) }}"></script>
 <script src="{{ asset('assets/js/theme.js') }}"></script>
 <script src="{{ asset('assets/js/admin.js') }}"></script>
 <script src="{{ asset('assets/js/confirmation-modal.js') }}"></script>

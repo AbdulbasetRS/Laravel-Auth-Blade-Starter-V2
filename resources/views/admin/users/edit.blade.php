@@ -1,142 +1,78 @@
 @extends('layouts.admin')
 
-@section('page-title', __('navigation.users'))
+@section('page-title', __('users.edit'))
 @section('title', __('users.edit'))
 
 @php
-    // Safely resolve enums — old DB rows may have null/0 instead of a valid string
-    $statusEnum = ($user->status instanceof \App\Enums\UserStatus)
-        ? $user->status
-        : \App\Enums\UserStatus::tryFrom((string) $user->status);
-
-    $typeEnum = ($user->type instanceof \App\Enums\UserType)
-        ? $user->type
-        : \App\Enums\UserType::tryFrom((string) $user->type);
-
-    $currentStatus = old('status', $statusEnum?->value ?? '');
-    $currentType   = old('type',   $typeEnum?->value   ?? '');
+    $profile = $user->profile;
+    $statusEnum = $user->status instanceof \App\Enums\UserStatus ? $user->status : \App\Enums\UserStatus::tryFrom((string) $user->status);
+    $typeEnum = $user->type instanceof \App\Enums\UserType ? $user->type : \App\Enums\UserType::tryFrom((string) $user->type);
+    $avatarUrl = ($profile?->avatar && !str_starts_with($profile->avatar, 'http')) ? asset('storage/' . ltrim($profile->avatar, '/')) : $profile?->avatar;
 @endphp
 
 @section('content')
-<div class="inner-body">
-    <form method="POST" action="{{ route('admin.users.update', $user) }}" id="editUserForm" novalidate>
-        @csrf
-        @method('PUT')
+<div class="inner-body wizard-shell">
+    <form id="editUserWizard" method="POST" enctype="multipart/form-data" action="{{ route('admin.users.update', $user) }}" data-check-url="{{ route('admin.users.check-availability', absolute: false) }}" data-show-url="{{ route('admin.users.show', $user, absolute: false) }}" data-user-id="{{ $user->id }}" novalidate>
+        @csrf @method('PUT')
 
-        <div class="view-user-card">
-            <div class="view-user-header">
-                <div class="view-user-avatar">{{ \Illuminate\Support\Str::of($user->username ?? '?')->substr(0, 1)->upper() }}</div>
-                <div class="view-user-heading">
-                    <h2>{{ __('users.edit_title', ['name' => $user->username]) }}</h2>
-                    <p>{{ __('users.edit_subtitle') }}</p>
-                </div>
+        <div class="wizard-progress">
+            <div class="edit-wizard-heading"><div class="edit-wizard-avatar">{{ \Illuminate\Support\Str::of($user->username ?? '?')->substr(0, 1)->upper() }}</div><div><h2 class="wizard-progress-title">{{ __('users.edit_title', ['name' => $user->username]) }}</h2><p class="wizard-progress-subtitle">{{ __('users.edit_subtitle') }}</p></div></div>
+            <div class="wizard-steps-track" role="list">
+                @foreach(['Personal Info', 'Contact & Identity', 'Account & Access', 'Review'] as $number => $label)
+                    <div class="wizard-step-item {{ $number === 0 ? 'active' : '' }}" data-step="{{ $number + 1 }}" role="listitem"><div class="wizard-step-bubble"><span class="step-num">{{ $number + 1 }}</span><svg class="step-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg></div><span class="wizard-step-label">{{ $label }}</span></div>
+                @endforeach
             </div>
+        </div>
 
-            {{-- ─── Account fields ──────────────────────────────────────────── --}}
-            <x-form.field name="username" :label="__('users.username')" :value="$user->username" required autofocus />
-            <x-form.field name="email" type="email" :label="__('users.email')" :value="$user->email" required />
-            <x-form.field name="mobile_number" :label="__('users.mobile_number')" :value="$user->mobile_number" required />
-
-            {{-- ─── Status ────────────────────────────────────────────────────────── --}}
-            <div class="field">
-                <label for="status">{{ __('users.status') }}</label>
-                <x-dropdown id="editStatusDropdown" variant="light" :select-style="true">
-                    <x-slot:trigger>
-                        <span class="select-value">{{ $statusEnum?->label() ?? $currentStatus }}</span>
-                    </x-slot:trigger>
-                    @foreach(\App\Enums\UserStatus::cases() as $status)
-                        <x-dropdown-item
-                            data-value="{{ $status->value }}"
-                            :selected="$currentStatus === $status->value">
-                            {{ $status->label() }}
-                        </x-dropdown-item>
-                    @endforeach
-                </x-dropdown>
-                <input type="hidden" name="status" id="status" value="{{ $currentStatus }}">
+        <div class="wizard-card">
+            <section class="wizard-panel active" data-step="1"><div class="wizard-card-inner"><p class="wizard-panel-title">Personal Information</p><p class="wizard-panel-subtitle">Update the user's basic personal details.</p><div class="wiz-grid">
+                <div class="fl-field"><label class="fl-label" for="profile_title">Title</label><input class="fl-input" id="profile_title" name="profile[title]" data-field-name="profile.title" value="{{ old('profile.title', $profile?->title) }}" maxlength="50" autocomplete="honorific-prefix"><span class="edit-api-error" data-error="profile.title"></span></div>
+                <div class="fl-field"><label class="fl-label" for="profile_gender">Gender</label><select class="fl-input fl-select" id="profile_gender" name="profile[gender]" data-field-name="profile.gender"><option value=""></option><option value="male" @selected(old('profile.gender', $profile?->gender) === 'male')>Male</option><option value="female" @selected(old('profile.gender', $profile?->gender) === 'female')>Female</option></select><span class="edit-api-error" data-error="profile.gender"></span></div>
+                <div class="fl-field"><label class="fl-label" for="profile_first_name">First Name <b class="required-mark">*</b></label><input class="fl-input" id="profile_first_name" name="profile[first_name]" data-field-name="profile.first_name" value="{{ old('profile.first_name', $profile?->first_name) }}" maxlength="100" autocomplete="given-name" required><span class="edit-api-error" data-error="profile.first_name"></span></div>
+                <div class="fl-field"><label class="fl-label" for="profile_last_name">Last Name <b class="required-mark">*</b></label><input class="fl-input" id="profile_last_name" name="profile[last_name]" data-field-name="profile.last_name" value="{{ old('profile.last_name', $profile?->last_name) }}" maxlength="100" autocomplete="family-name" required><span class="edit-api-error" data-error="profile.last_name"></span></div>
+                <div class="fl-field wiz-full"><label class="fl-label" for="profile_middle_name">Middle Name</label><input class="fl-input" id="profile_middle_name" name="profile[middle_name]" data-field-name="profile.middle_name" value="{{ old('profile.middle_name', $profile?->middle_name) }}" maxlength="100" autocomplete="additional-name"><span class="edit-api-error" data-error="profile.middle_name"></span></div>
+                <div class="fl-field"><label class="fl-label" for="profile_date_of_birth">Date of Birth</label><input class="fl-input" type="date" id="profile_date_of_birth" name="profile[date_of_birth]" data-field-name="profile.date_of_birth" value="{{ old('profile.date_of_birth', $profile?->date_of_birth?->format('Y-m-d')) }}" max="{{ date('Y-m-d') }}"><span class="edit-api-error" data-error="profile.date_of_birth"></span></div>
             </div>
+            <div class="fl-field wiz-full avatar-field"><span class="avatar-label">Profile Photo</span><div class="avatar-upload-area"><div class="avatar-preview-wrap {{ $avatarUrl ? 'has-image' : '' }}" id="avatarPreviewWrap"><svg class="avatar-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><img id="avatarPreviewImg" src="{{ $avatarUrl }}" alt="Avatar preview"></div><div class="avatar-upload-controls"><p class="avatar-upload-hint">JPEG, PNG, JPG, GIF, or WebP<br>Max size: 2MB</p><div class="avatar-upload-actions"><button type="button" class="avatar-btn-choose" id="avatarChooseBtn">Choose Photo</button><button type="button" class="avatar-btn-remove" id="avatarRemoveBtn">Remove</button></div><input type="file" id="avatar" name="avatar" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" hidden><input type="hidden" id="remove_avatar" name="remove_avatar" value="0"><span id="avatarErrorMsg" style="font-size:12px;color:var(--error);display:none"></span></div></div></div>
+            </div></section>
 
-            {{-- ─── Type ────────────────────────────────────────────────────────── --}}
-            <div class="field">
-                <label for="type">{{ __('users.type') }}</label>
-                <x-dropdown id="editTypeDropdown" variant="light" :select-style="true">
-                    <x-slot:trigger>
-                        <span class="select-value">{{ $typeEnum?->label() ?? $currentType }}</span>
-                    </x-slot:trigger>
-                    @foreach(\App\Enums\UserType::cases() as $type)
-                        <x-dropdown-item
-                            data-value="{{ $type->value }}"
-                            :selected="$currentType === $type->value">
-                            {{ $type->label() }}
-                        </x-dropdown-item>
-                    @endforeach
-                </x-dropdown>
-                <input type="hidden" name="type" id="type" value="{{ $currentType }}">
-            </div>
+            <section class="wizard-panel" data-step="2"><div class="wizard-card-inner"><p class="wizard-panel-title">Contact & Identity</p><p class="wizard-panel-subtitle">Update the user's contact details and documents.</p><div class="wiz-grid">
+                <div class="fl-field wiz-full avail-field"><label class="fl-label" for="email">Email Address <b class="required-mark">*</b></label><input class="fl-input" type="email" id="email" name="email" data-field-name="email" value="{{ old('email', $user->email) }}" maxlength="255" autocomplete="email" required><span class="availability-status" data-availability="email"></span><span class="edit-api-error" data-error="email"></span></div>
+                <div class="fl-field avail-field"><label class="fl-label" for="mobile_number">Mobile Number <b class="required-mark">*</b></label><input class="fl-input" type="tel" id="mobile_number" name="mobile_number" data-field-name="mobile_number" value="{{ old('mobile_number', $user->mobile_number) }}" maxlength="30" autocomplete="tel" required><span class="availability-status" data-availability="mobile_number"></span><span class="edit-api-error" data-error="mobile_number"></span></div>
+                <div class="fl-field"><label class="fl-label" for="profile_whatsapp">WhatsApp</label><input class="fl-input" type="tel" id="profile_whatsapp" name="profile[whatsapp]" data-field-name="profile.whatsapp" value="{{ old('profile.whatsapp', $profile?->whatsapp) }}" maxlength="30"><span class="edit-api-error" data-error="profile.whatsapp"></span></div>
+                <div class="fl-field"><label class="fl-label" for="profile_telegram">Telegram</label><input class="fl-input" id="profile_telegram" name="profile[telegram]" data-field-name="profile.telegram" value="{{ old('profile.telegram', $profile?->telegram) }}" maxlength="100"><span class="edit-api-error" data-error="profile.telegram"></span></div>
+                <div class="fl-field"><label class="fl-label" for="nationality">Nationality</label><input class="fl-input" id="nationality" name="nationality" data-field-name="nationality" value="{{ old('nationality', $user->nationality) }}" maxlength="100"><span class="edit-api-error" data-error="nationality"></span></div>
+                <div class="fl-field avail-field"><label class="fl-label" for="national_id">National ID</label><input class="fl-input" id="national_id" name="national_id" data-field-name="national_id" value="{{ old('national_id', $user->national_id) }}" maxlength="50"><span class="availability-status" data-availability="national_id"></span><span class="edit-api-error" data-error="national_id"></span></div>
+                <div class="fl-field avail-field"><label class="fl-label" for="passport_number">Passport Number</label><input class="fl-input" id="passport_number" name="passport_number" data-field-name="passport_number" value="{{ old('passport_number', $user->passport_number) }}" maxlength="50"><span class="availability-status" data-availability="passport_number"></span><span class="edit-api-error" data-error="passport_number"></span></div>
+                <div class="fl-field wiz-full fl-field-textarea"><label class="fl-label" for="profile_address">Address</label><textarea class="fl-input fl-textarea" id="profile_address" name="profile[address]" data-field-name="profile.address" rows="3" maxlength="500">{{ old('profile.address', $profile?->address) }}</textarea><span class="edit-api-error" data-error="profile.address"></span></div>
+            </div></div></section>
 
-            {{-- ─── Optional fields ─────────────────────────────────────────── --}}
-            <x-form.field name="national_id" :label="__('users.national_id')" :value="$user->national_id" />
-            <x-form.field name="nationality" :label="__('users.nationality')" :value="$user->nationality" />
-            <x-form.field name="passport_number" :label="__('users.passport_number')" :value="$user->passport_number" />
+            <section class="wizard-panel" data-step="3"><div class="wizard-card-inner"><p class="wizard-panel-title">Account & Access</p><p class="wizard-panel-subtitle">Configure credentials and permissions. Leave password blank to keep it unchanged.</p><div class="wiz-grid">
+                <div class="fl-field avail-field"><label class="fl-label" for="username">Username <b class="required-mark">*</b></label><input class="fl-input" id="username" name="username" data-field-name="username" value="{{ old('username', $user->username) }}" maxlength="100" autocomplete="username" required><span class="availability-status" data-availability="username"></span><span class="edit-api-error" data-error="username"></span></div>
+                <div class="fl-field"><label class="fl-label" for="role_id">Role</label><input class="fl-input" id="role_id" name="role_id" data-field-name="role_id" value="{{ old('role_id', $user->role_id) }}" maxlength="100"><span class="edit-api-error" data-error="role_id"></span></div>
+                <div class="fl-field"><label class="fl-label" for="password">Password</label><div class="fl-input-wrap"><input class="fl-input" type="password" id="password" name="password" data-field-name="password" autocomplete="new-password" minlength="8"><button type="button" class="fl-pw-toggle" data-target="password">Show</button></div><div class="pw-strength-wrap"><div class="pw-strength-bar-track"><div class="pw-strength-bar-fill" id="pwStrengthFill"></div></div><div class="pw-strength-label" id="pwStrengthLabel"></div></div><span class="edit-api-error" data-error="password"></span></div>
+                <div class="fl-field"><label class="fl-label" for="password_confirmation">Confirm Password</label><div class="fl-input-wrap"><input class="fl-input" type="password" id="password_confirmation" name="password_confirmation" data-field-name="password_confirmation" autocomplete="new-password"><button type="button" class="fl-pw-toggle" data-target="password_confirmation">Show</button></div><span class="edit-api-error" data-error="password_confirmation"></span></div>
+                <div class="fl-field"><label class="fl-label" for="type">User Type <b class="required-mark">*</b></label><select class="fl-input fl-select" id="type" name="type" data-field-name="type" required><option value=""></option>@foreach(\App\Enums\UserType::cases() as $userType)<option value="{{ $userType->value }}" @selected(old('type', $typeEnum?->value) === $userType->value)>{{ $userType->label() }}</option>@endforeach</select><span class="edit-api-error" data-error="type"></span></div>
+                <div class="fl-field"><label class="fl-label" for="status">Status <b class="required-mark">*</b></label><select class="fl-input fl-select" id="status" name="status" data-field-name="status" required><option value=""></option>@foreach(\App\Enums\UserStatus::cases() as $userStatus)<option value="{{ $userStatus->value }}" @selected(old('status', $statusEnum?->value) === $userStatus->value)>{{ $userStatus->label() }}</option>@endforeach</select><span class="edit-api-error" data-error="status"></span></div>
+                <div class="fl-field"><label class="fl-label" for="credits">Credits</label><input class="fl-input" type="number" id="credits" name="credits" data-field-name="credits" value="{{ old('credits', $user->credits) }}" min="0"><span class="edit-api-error" data-error="credits"></span></div>
+                <div class="wiz-full"><div class="wiz-toggle-field" id="canLoginField"><div><div class="wiz-toggle-label">Can Login</div><div class="wiz-toggle-desc">Allow this user to log in to the system.</div></div><button type="button" class="wiz-toggle-switch {{ old('can_login', $user->can_login) ? 'on' : '' }}" data-target="can_login" id="canLoginToggle" aria-pressed="{{ old('can_login', $user->can_login) ? 'true' : 'false' }}"></button></div><input type="hidden" id="can_login" name="can_login" value="{{ old('can_login', $user->can_login) ? '1' : '0' }}"></div>
+                <div class="fl-field wiz-full fl-field-textarea"><label class="fl-label" for="status_details">Status Details / Notes</label><textarea class="fl-input fl-textarea" id="status_details" name="status_details" data-field-name="status_details" rows="3" maxlength="1000">{{ old('status_details', $user->status_details) }}</textarea><span class="edit-api-error" data-error="status_details"></span></div>
+            </div></div></section>
 
-            {{-- ─── Password ────────────────────────────────────────────────── --}}
-            <x-form.field name="password" type="password" :label="__('users.password_new')" toggle />
-            <p class="edit-user-hint">{{ __('users.password_hint') }}</p>
+            <section class="wizard-panel" data-step="4"><div class="wizard-card-inner"><p class="wizard-panel-title">Review & Save</p><p class="wizard-panel-subtitle">Review the updated information before saving.</p>
+                <div class="review-section"><div class="review-section-header"><span class="review-section-title">Personal Information</span><button type="button" class="review-section-edit" data-edit-step="1">Edit</button></div><div class="review-grid" id="reviewPersonal"></div></div>
+                <div class="review-section"><div class="review-section-header"><span class="review-section-title">Contact & Identity</span><button type="button" class="review-section-edit" data-edit-step="2">Edit</button></div><div class="review-grid" id="reviewContact"></div></div>
+                <div class="review-section"><div class="review-section-header"><span class="review-section-title">Account & Access</span><button type="button" class="review-section-edit" data-edit-step="3">Edit</button></div><div class="review-grid" id="reviewAccount"></div></div>
+            </div></section>
 
-            <div class="edit-user-actions">
-                <button type="submit" class="btn btn-primary">
-                    {{ __('users.save') }}
-                </button>
-                <a href="{{ route('admin.users.show', $user) }}" class="btn-ghost">{{ __('common.cancel') }}</a>
-            </div>
+            <div class="wizard-footer"><div class="wizard-footer-left"><button type="button" id="editBackBtn" class="btn-ghost" style="display:none">← Back</button><a href="{{ route('admin.users.show', $user) }}" class="btn-ghost">{{ __('common.cancel') }}</a></div><div class="wizard-footer-right"><span class="wizard-step-hint" id="editStepHint">Step 1 of 4</span><button type="button" id="editNextBtn" class="btn btn-primary">Next →</button><button type="submit" id="editSubmitBtn" class="btn btn-primary" style="display:none"><span class="wiz-spinner" style="display:none;margin-inline-end:6px"></span><span class="btn-text">{{ __('users.save') }}</span></button></div></div>
         </div>
     </form>
 </div>
 @endsection
 
 @push('styles')
-<style>
-    .edit-user-hint{font-size:12px;color:var(--muted);margin:-12px 0 0;}
-    .edit-user-actions{display:flex;gap:10px;margin-top:8px;}
-</style>
+<link rel="stylesheet" href="{{ asset('assets/css/user-wizard.css') }}">
+<style>.edit-wizard-heading{display:flex;align-items:center;gap:14px;margin-bottom:20px}.edit-wizard-heading .wizard-progress-subtitle{margin:4px 0 0}.edit-wizard-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--primary);color:#fff;font-weight:700;font-size:17px}.required-mark{color:var(--error)}.avatar-label{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:10px}.edit-api-error,.availability-status{display:none!important}</style>
 @endpush
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Status dropdown
-        var statusDropdown = document.getElementById('editStatusDropdown');
-        var statusInput = document.getElementById('status');
-        if (statusDropdown && statusInput) {
-            statusDropdown.addEventListener('select-change', function (e) {
-                statusInput.value = e.detail.value;
-            });
-        }
-
-        // Type dropdown
-        var typeDropdown = document.getElementById('editTypeDropdown');
-        var typeInput = document.getElementById('type');
-        if (typeDropdown && typeInput) {
-            typeDropdown.addEventListener('select-change', function (e) {
-                typeInput.value = e.detail.value;
-            });
-        }
-
-        // Password toggle
-        document.querySelectorAll('.pw-toggle').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var input = document.getElementById(btn.getAttribute('data-toggle-target'));
-                if (!input) return;
-                var isPw = input.type === 'password';
-                input.type = isPw ? 'text' : 'password';
-                btn.textContent = isPw ? btn.getAttribute('data-hide-label') : btn.getAttribute('data-show-label');
-            });
-        });
-    });
-
-    @if(session('toast_success'))
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.Toast) Toast.success(@json(session('toast_success')));
-        });
-    @endif
-</script>
-@endpush
+@push('scripts')<script src="{{ asset('assets/js/user-edit-wizard.js') }}"></script>@endpush
