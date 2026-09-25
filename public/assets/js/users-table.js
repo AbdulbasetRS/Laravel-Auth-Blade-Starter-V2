@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
           '<div class="user-cell-email">' + escapeHtml(user.email) + '</div></div>' +
         '</div></td>' +
         '<td data-col="status">' + statusBadge + '</td>' +
+        '<td data-col="type">' + user.type + '</td>' +
         '<td data-col="verified">' + verified + '</td>' +
         '<td data-col="joined" style="font-family:\'IBM Plex Mono\',monospace;font-size:12px;">' + escapeHtml((user.created_at || '').substring(0, 10)) + '</td>' +
         '<td data-col="actions">' +
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ---------- Export (Excel / CSV) — respects the current active filters ----------
-  var EXPORT_FILTER_KEYS = ['search', 'status', 'verified', 'date_from', 'date_to', 'sort'];
+  var EXPORT_FILTER_KEYS = ['search', 'status', 'type', 'verified', 'date_from', 'date_to', 'sort'];
 
   document.querySelectorAll('[data-export]').forEach(function (link) {
     link.addEventListener('click', function (e) {

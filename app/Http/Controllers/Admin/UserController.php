@@ -32,7 +32,7 @@ class UserController extends Controller
     public function data(Request $request): JsonResponse
     {
         $users = $this->users->getFiltered($request->only([
-            'search', 'status', 'verified', 'date_from', 'date_to', 'sort', 'per_page',
+            'search', 'status', 'type', 'verified', 'date_from', 'date_to', 'sort', 'per_page',
         ]));
 
         return response()->json([
