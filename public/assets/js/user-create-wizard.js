@@ -45,6 +45,7 @@
   var touched = {}; // fieldName → true once blurred
   var availCache = {}; // fieldName → 'ok' | 'taken' | null
   var availTimers = {};
+  var availXhrs = {}; // fieldName → XMLHttpRequest (in-flight)
   var isSubmitting = false;
 
   // Collected data across all steps
@@ -376,34 +377,69 @@
   /* ────────────────────────────────────────────────────────────────
      Async Availability Check
   ──────────────────────────────────────────────────────────────── */
-  function scheduleAvailabilityCheck(fieldName, value) {
+  function abortAvailabilityCheck(fieldName) {
     clearTimeout(availTimers[fieldName]);
-    var wrap = document.getElementById(fieldName.replace(/\./g,'_') + '_wrap');
+    availTimers[fieldName] = null;
+    if (availXhrs[fieldName]) {
+      try { availXhrs[fieldName].abort(); } catch (e) { /* ignore */ }
+      availXhrs[fieldName] = null;
+    }
+  }
+
+  function beginAvailabilityRecheck(fieldName, wrap) {
+    abortAvailabilityCheck(fieldName);
+    availCache[fieldName] = null;
+    clearError(fieldName);
+    if (wrap) {
+      wrap.classList.remove('avail-ok', 'avail-taken');
+      wrap.classList.add('checking');
+    }
+  }
+
+  function scheduleAvailabilityCheck(fieldName, value) {
+    var wrap = document.getElementById(fieldName.replace(/\./g, '_') + '_wrap');
 
     if (!value || value.length < 2) {
-      if (wrap) { wrap.classList.remove('checking', 'avail-ok', 'avail-taken'); }
+      abortAvailabilityCheck(fieldName);
       availCache[fieldName] = null;
+      clearError(fieldName);
+      if (wrap) { wrap.classList.remove('checking', 'avail-ok', 'avail-taken'); }
       return;
     }
+
+    // Any change: drop previous result and show spinner, then recheck
+    beginAvailabilityRecheck(fieldName, wrap);
+
+    availTimers[fieldName] = setTimeout(function () {
+      var current = getValue(fieldName);
+      if (current !== value) return;
+      doAvailabilityCheck(fieldName, value, wrap);
+    }, 420);
+  }
+
+  function doAvailabilityCheck(fieldName, value, wrap) {
+    abortAvailabilityCheck(fieldName);
+    availCache[fieldName] = null;
 
     if (wrap) {
       wrap.classList.remove('avail-ok', 'avail-taken');
       wrap.classList.add('checking');
     }
 
-    availTimers[fieldName] = setTimeout(function () {
-      doAvailabilityCheck(fieldName, value, wrap);
-    }, 420);
-  }
-
-  function doAvailabilityCheck(fieldName, value, wrap) {
     var xhr = new XMLHttpRequest();
+    availXhrs[fieldName] = xhr;
+
     xhr.open('GET', checkUrl + '?field=' + encodeURIComponent(fieldName) + '&value=' + encodeURIComponent(value), true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState !== XMLHttpRequest.DONE) return;
+      if (availXhrs[fieldName] !== xhr) return; // superseded
+      availXhrs[fieldName] = null;
+
+      if (getValue(fieldName) !== value) return;
       if (!wrap) return;
+
       wrap.classList.remove('checking');
       try {
         var resp = JSON.parse(xhr.responseText);
@@ -422,6 +458,20 @@
     };
 
     xhr.send();
+  }
+
+  function hasPendingAvailabilityChecks(stepNum) {
+    var panel = getPanel(stepNum);
+    if (!panel) return false;
+    var pending = false;
+    panel.querySelectorAll('.fl-input[data-field-name]').forEach(function (inp) {
+      var name = inp.dataset.fieldName;
+      if (!name || UNIQUE_FIELDS.indexOf(name) === -1) return;
+      var val = inp.value.trim();
+      if (!val || val.length < 2) return;
+      if (availCache[name] == null) pending = true;
+    });
+    return pending;
   }
 
   /* ────────────────────────────────────────────────────────────────
@@ -851,6 +901,10 @@
   ──────────────────────────────────────────────────────────────── */
   if (nextBtn) {
     nextBtn.addEventListener('click', function () {
+      if (hasPendingAvailabilityChecks(currentStep)) {
+        if (window.Toast) Toast.info('Please wait until availability checks finish.');
+        return;
+      }
       if (!validateStep(currentStep)) return;
       goToStep(currentStep + 1, 'forward');
     });
