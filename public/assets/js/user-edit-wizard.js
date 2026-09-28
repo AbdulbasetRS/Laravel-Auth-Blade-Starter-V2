@@ -50,6 +50,7 @@
   var isSubmitting = false;
 
   var avatarFile = null; // File | null
+  var removeAvatar = false; // true when user cleared the existing avatar
 
   /* ────────────────────────────────────────────────────────────────
      DOM references
@@ -330,12 +331,38 @@
   /* ────────────────────────────────────────────────────────────────
      Avatar Upload
   ──────────────────────────────────────────────────────────────── */
+  function setChooseAvatarLabel(text) {
+    var chooseBtn = document.querySelector('.avatar-btn-choose');
+    if (!chooseBtn) return;
+    var svg = chooseBtn.querySelector('svg');
+    chooseBtn.textContent = '';
+    if (svg) chooseBtn.appendChild(svg);
+    chooseBtn.appendChild(document.createTextNode(' ' + text));
+  }
+
+  function clearAvatarPreview() {
+    var previewWrap = document.getElementById('avatarPreviewWrap');
+    var previewImg  = document.getElementById('avatarPreviewImg');
+    var removeBtn   = document.getElementById('avatarRemoveBtn');
+    var placeholder = previewWrap ? previewWrap.querySelector('.avatar-placeholder-icon') : null;
+
+    if (previewImg) {
+      previewImg.removeAttribute('src');
+      previewImg.style.display = 'none';
+    }
+    if (previewWrap) previewWrap.classList.remove('has-image');
+    if (placeholder) placeholder.style.display = '';
+    if (removeBtn) removeBtn.style.display = 'none';
+    setChooseAvatarLabel('Choose Photo');
+  }
+
   function initAvatarUpload() {
     var fileInput    = document.getElementById('avatar');
     var previewWrap  = document.getElementById('avatarPreviewWrap');
     var previewImg   = document.getElementById('avatarPreviewImg');
     var removeBtn    = document.getElementById('avatarRemoveBtn');
     var avatarError  = document.getElementById('avatarErrorMsg');
+    var placeholder  = previewWrap ? previewWrap.querySelector('.avatar-placeholder-icon') : null;
 
     if (!fileInput || !previewWrap) return;
 
@@ -359,13 +386,16 @@
 
       if (avatarError) avatarError.style.display = 'none';
       avatarFile = file;
+      removeAvatar = false;
 
       var reader = new FileReader();
       reader.onload = function (e) {
         previewImg.src = e.target.result;
         previewImg.style.display = 'block';
         previewWrap.classList.add('has-image');
+        if (placeholder) placeholder.style.display = 'none';
         if (removeBtn) removeBtn.style.display = 'inline-flex';
+        setChooseAvatarLabel('Change Photo');
       };
       reader.readAsDataURL(file);
     });
@@ -374,16 +404,9 @@
       removeBtn.addEventListener('click', function () {
         avatarFile = null;
         fileInput.value = '';
-        if (currentAvatar) {
-          previewImg.src = currentAvatar;
-          previewImg.style.display = 'block';
-          previewWrap.classList.add('has-image');
-        } else {
-          previewImg.src = '';
-          previewImg.style.display = 'none';
-          previewWrap.classList.remove('has-image');
-          removeBtn.style.display = 'none';
-        }
+        // Existing photo must actually be cleared on save (not restored in the UI)
+        if (currentAvatar) removeAvatar = true;
+        clearAvatarPreview();
         if (avatarError) avatarError.style.display = 'none';
       });
     }
@@ -776,10 +799,10 @@
       var url = URL.createObjectURL(avatarFile);
       return reviewField('Avatar', '<img class="review-avatar-thumb" src="' + url + '" alt="Avatar">');
     }
-    if (currentAvatar) {
-      return reviewField('Avatar', '<img class="review-avatar-thumb" src="' + escHtml(currentAvatar) + '" alt="Avatar">');
+    if (removeAvatar || !currentAvatar) {
+      return reviewField('Avatar', '<span class="review-value empty">—</span>');
     }
-    return reviewField('Avatar', '<span class="review-value empty">—</span>');
+    return reviewField('Avatar', '<img class="review-avatar-thumb" src="' + escHtml(currentAvatar) + '" alt="Avatar">');
   }
 
   /* ────────────────────────────────────────────────────────────────
@@ -813,7 +836,11 @@
     data._token = csrfToken;
     data._method = 'PUT'; // Method spoofing for PUT update
 
-    var useFormData = !!avatarFile;
+    if (removeAvatar && !avatarFile) {
+      data.remove_avatar = 1;
+    }
+
+    var useFormData = !!avatarFile || (!!removeAvatar && !avatarFile);
     var body;
 
     if (useFormData) {
@@ -834,7 +861,7 @@
         });
       }
       appendToFormData(body, data, '');
-      body.append('avatar', avatarFile);
+      if (avatarFile) body.append('avatar', avatarFile);
     } else {
       body = JSON.stringify(data);
     }

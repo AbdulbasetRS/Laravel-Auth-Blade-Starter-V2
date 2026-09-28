@@ -21,6 +21,12 @@ class UpdateUserRequest extends FormRequest
                 'can_login' => filter_var($this->input('can_login'), FILTER_VALIDATE_BOOLEAN),
             ]);
         }
+
+        if ($this->exists('remove_avatar')) {
+            $this->merge([
+                'remove_avatar' => filter_var($this->input('remove_avatar'), FILTER_VALIDATE_BOOLEAN),
+            ]);
+        }
     }
 
     public function rules(): array
@@ -56,7 +62,8 @@ class UpdateUserRequest extends FormRequest
             'profile.note'          => ['nullable', 'string', 'max:1000'],
 
             // ─── Avatar ──────────────────────────────────────────────────────
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'avatar'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'remove_avatar' => ['nullable', 'boolean'],
         ];
     }
 

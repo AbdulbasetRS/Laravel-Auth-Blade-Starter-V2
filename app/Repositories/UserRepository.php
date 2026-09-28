@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserRepository implements UserRepositoryInterface
@@ -125,13 +126,14 @@ class UserRepository implements UserRepositoryInterface
 
     public function update(User $user, array $data): User
     {
-        $password    = $data['password'] ?? null;
-        $profileData = $data['profile'] ?? [];
-        $avatarFile  = (isset($data['avatar']) && $data['avatar'] instanceof UploadedFile)
-                       ? $data['avatar']
-                       : null;
+        $password     = $data['password'] ?? null;
+        $profileData  = $data['profile'] ?? [];
+        $avatarFile   = (isset($data['avatar']) && $data['avatar'] instanceof UploadedFile)
+                        ? $data['avatar']
+                        : null;
+        $removeAvatar = (bool) ($data['remove_avatar'] ?? false);
 
-        unset($data['password'], $data['profile'], $data['avatar']);
+        unset($data['password'], $data['profile'], $data['avatar'], $data['remove_avatar']);
 
         $actorId = Auth::id();
         $data['updated_by'] = $actorId;
@@ -145,9 +147,13 @@ class UserRepository implements UserRepositoryInterface
         $user->save();
 
         // Update or create the profile record
-        if (! empty($profileData) || $avatarFile !== null) {
+        if (! empty($profileData) || $avatarFile !== null || $removeAvatar) {
             if ($avatarFile !== null) {
+                $this->deleteUserAvatar($user);
                 $profileData['avatar'] = $this->storeUserAvatar($user, $avatarFile);
+            } elseif ($removeAvatar) {
+                $this->deleteUserAvatar($user);
+                $profileData['avatar'] = null;
             }
 
             $profileData['updated_by'] = $actorId;
@@ -174,6 +180,20 @@ class UserRepository implements UserRepositoryInterface
         $filename  = FileNameGenerator::makeFromFile('user', 'avatar', $user->id, $file);
 
         return $file->storeAs($directory, $filename, 'public');
+    }
+
+    /**
+     * Delete the stored avatar file for a user (local public-disk paths only).
+     */
+    protected function deleteUserAvatar(User $user): void
+    {
+        $path = $user->profile?->avatar;
+
+        if (! $path || str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return;
+        }
+
+        Storage::disk('public')->delete($path);
     }
 
     /**
