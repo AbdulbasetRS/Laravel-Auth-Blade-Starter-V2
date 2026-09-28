@@ -28,19 +28,51 @@ class UpdateUserRequest extends FormRequest
         $userId = $this->route('user')->id;
 
         return [
-            'username'       => ['required', 'string', 'max:100', Rule::unique('users', 'username')->ignore($userId)],
-            'email'          => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
-            'mobile_number'  => ['required', 'string', 'max:30', Rule::unique('users', 'mobile_number')->ignore($userId)],
-            'national_id'    => ['nullable', 'string', 'max:50', Rule::unique('users', 'national_id')->ignore($userId)],
-            'nationality'    => ['nullable', 'string', 'max:100'],
-            'passport_number'=> ['nullable', 'string', 'max:50', Rule::unique('users', 'passport_number')->ignore($userId)],
-            'password'       => ['nullable', 'string', 'min:8'],
-            'status'         => ['required', Rule::enum(UserStatus::class)],
-            'type'           => ['required', Rule::enum(UserType::class)],
-            'credits'        => ['nullable', 'integer', 'min:0'],
-            'can_login'      => ['nullable', 'boolean'],
-            'status_details' => ['nullable', 'string', 'max:1000'],
-            'role_id'        => ['nullable', 'string', 'max:100'],
+            // ─── User account fields ─────────────────────────────────────────
+            'username'        => ['required', 'string', 'max:100', Rule::unique('users', 'username')->ignore($userId)],
+            'email'           => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'mobile_number'   => ['required', 'string', 'max:30', Rule::unique('users', 'mobile_number')->ignore($userId)],
+            'national_id'     => ['nullable', 'string', 'max:50', Rule::unique('users', 'national_id')->ignore($userId)],
+            'nationality'     => ['nullable', 'string', 'max:100'],
+            'passport_number' => ['nullable', 'string', 'max:50', Rule::unique('users', 'passport_number')->ignore($userId)],
+            'password'        => ['nullable', 'string', 'min:8'],
+            'status'          => ['required', Rule::enum(UserStatus::class)],
+            'type'            => ['required', Rule::enum(UserType::class)],
+            'credits'         => ['nullable', 'integer', 'min:0'],
+            'can_login'       => ['nullable', 'boolean'],
+            'status_details'  => ['nullable', 'string', 'max:1000'],
+            'role_id'         => ['nullable', 'string', 'max:100'],
+
+            // ─── Profile fields ──────────────────────────────────────────────
+            'profile.first_name'    => ['required', 'string', 'max:100'],
+            'profile.middle_name'   => ['nullable', 'string', 'max:100'],
+            'profile.last_name'     => ['required', 'string', 'max:100'],
+            'profile.title'         => ['nullable', 'string', 'max:50'],
+            'profile.gender'        => ['nullable', 'in:male,female'],
+            'profile.date_of_birth' => ['nullable', 'date', 'before:today'],
+            'profile.whatsapp'      => ['nullable', 'string', 'max:30'],
+            'profile.telegram'      => ['nullable', 'string', 'max:100'],
+            'profile.address'       => ['nullable', 'string', 'max:500'],
+            'profile.note'          => ['nullable', 'string', 'max:1000'],
+
+            // ─── Avatar ──────────────────────────────────────────────────────
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'profile.first_name'    => 'first name',
+            'profile.middle_name'   => 'middle name',
+            'profile.last_name'     => 'last name',
+            'profile.title'         => 'title',
+            'profile.gender'        => 'gender',
+            'profile.date_of_birth' => 'date of birth',
+            'profile.whatsapp'      => 'WhatsApp',
+            'profile.telegram'      => 'Telegram',
+            'profile.address'       => 'address',
+            'profile.note'          => 'note',
         ];
     }
 }

@@ -68,10 +68,10 @@ class UserController extends Controller
     }
 
     /**
-     * XHR availability check — used by the Create User wizard to give instant
+     * XHR availability check — used by the Create/Edit User wizard to give instant
      * feedback on unique fields (username, email, mobile, national_id, passport).
      *
-     * GET /admin/users/check-availability?field=username&value=abdulbaset
+     * GET /admin/users/check-availability?field=username&value=abdulbaset[&exclude_user_id=5]
      *
      * Returns: { available: true|false }
      */
@@ -79,16 +79,21 @@ class UserController extends Controller
     {
         $allowedFields = ['username', 'email', 'mobile_number', 'national_id', 'passport_number'];
 
-        $field = $request->input('field');
-        $value = (string) $request->input('value', '');
+        $field         = $request->input('field');
+        $value         = (string) $request->input('value', '');
+        $excludeUserId = $request->input('exclude_user_id');
 
         if (! in_array($field, $allowedFields, true) || $value === '') {
             return response()->json(['available' => true]);
         }
 
-        $taken = User::where($field, $value)->exists();
+        $query = User::where($field, $value);
 
-        return response()->json(['available' => ! $taken]);
+        if ($excludeUserId) {
+            $query->where('id', '!=', (int) $excludeUserId);
+        }
+
+        return response()->json(['available' => ! $query->exists()]);
     }
 
     /** Server-side is the source of truth — the modal's item details are for visual review only. */
@@ -111,12 +116,22 @@ class UserController extends Controller
 
     public function edit(User $user): View
     {
+        $user->load('profile');
+
         return view('admin.users.edit', ['user' => $user]);
     }
 
-    public function update(UpdateUserRequest $request, User $user): RedirectResponse
+    public function update(UpdateUserRequest $request, User $user): JsonResponse|RedirectResponse
     {
         $this->users->update($user, $request->validated());
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('users.update_success'),
+                'data'    => ['id' => $user->id],
+            ]);
+        }
 
         return redirect()
             ->route('admin.users.show', $user)
