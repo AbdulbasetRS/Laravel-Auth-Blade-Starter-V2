@@ -115,6 +115,7 @@ return [
     'gender_female'  => 'Female',
     'no_profile'     => 'No profile record yet.',
     'empty_value'    => '—',
+    'avatar'         => 'Avatar',
 
     // ─── Edit page ───────────────────────────────────────────────────────────
     'edit_title'    => 'Edit User — :name',

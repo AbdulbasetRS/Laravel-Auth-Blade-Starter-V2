@@ -26,10 +26,11 @@
     };
 
     $empty = __('users.empty_value');
+    $editUrl = route('admin.users.edit', $user);
 @endphp
 
 @section('content')
-<div class="inner-body ushow">
+<div class="inner-body wizard-shell ushow">
 
     {{-- Toolbar --}}
     <div class="ushow-toolbar">
@@ -38,7 +39,7 @@
             <span>{{ __('users.back_to_list') }}</span>
         </a>
         <div class="ushow-toolbar-actions">
-            <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-primary btn-sm">
+            <a href="{{ $editUrl }}" class="btn btn-primary btn-sm">
                 <x-icon name="pencil" style="width:14px;height:14px;" />
                 {{ __('users.edit') }}
             </a>
@@ -53,10 +54,9 @@
         </div>
     </div>
 
-    {{-- Hero --}}
-    <header class="ushow-hero">
-        <div class="ushow-hero-bg" aria-hidden="true"></div>
-        <div class="ushow-hero-body">
+    {{-- Identity header (wizard-progress card) --}}
+    <div class="wizard-progress ushow-identity">
+        <div class="ushow-identity-row">
             <div class="ushow-avatar {{ $avatarUrl ? 'has-image' : '' }}">
                 @if($avatarUrl)
                     <img src="{{ $avatarUrl }}" alt="{{ $displayName }}">
@@ -65,10 +65,11 @@
                 @endif
             </div>
 
-            <div class="ushow-hero-meta">
+            <div class="ushow-identity-meta">
                 <p class="ushow-eyebrow">#{{ $user->id }} · {{ $user->slug }}</p>
-                <h1 class="ushow-name">{{ $displayName }}</h1>
+                <h2 class="wizard-progress-title ushow-name">{{ $displayName }}</h2>
                 <p class="ushow-username">{{ '@' . $user->username }}</p>
+                <p class="wizard-progress-subtitle ushow-subtitle">{{ __('users.show_subtitle') }}</p>
 
                 <div class="ushow-badges">
                     @if($statusEnum)
@@ -99,186 +100,199 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="ushow-stats">
-            <div class="ushow-stat">
-                <span class="ushow-stat-label">{{ __('users.credits') }}</span>
-                <span class="ushow-stat-value">{{ number_format((int) $user->credits) }}</span>
-            </div>
-            <div class="ushow-stat">
-                <span class="ushow-stat-label">{{ __('users.can_login') }}</span>
-                <span class="ushow-stat-value {{ $user->can_login ? 'ok' : 'no' }}">
-                    {{ $user->can_login ? __('users.yes') : __('users.no') }}
-                </span>
-            </div>
-            <div class="ushow-stat">
-                <span class="ushow-stat-label">{{ __('users.column_joined') }}</span>
-                <span class="ushow-stat-value">{{ optional($user->created_at)->format('Y-m-d') ?: $empty }}</span>
-            </div>
-            <div class="ushow-stat">
-                <span class="ushow-stat-label">{{ __('users.updated_at') }}</span>
-                <span class="ushow-stat-value">{{ optional($user->updated_at)->format('Y-m-d') ?: $empty }}</span>
-            </div>
-        </div>
-    </header>
+    {{-- Detail body (wizard-card + review sections) --}}
+    <div class="wizard-card ushow-card">
+        <div class="wizard-card-inner">
 
-    {{-- Sections --}}
-    <div class="ushow-layout">
-
-        <section class="ushow-panel" style="--i:0">
-            <div class="ushow-panel-head">
-                <x-icon name="user" class="ushow-panel-icon" />
-                <h2>{{ __('users.section_personal') }}</h2>
-            </div>
-            @if($profile)
-                <div class="ushow-grid">
-                    <div class="ushow-field">
-                        <span class="ushow-label">{{ __('users.title_field') }}</span>
-                        <span class="ushow-value {{ $profile->title ? '' : 'empty' }}">{{ $profile->title ?: $empty }}</span>
-                    </div>
-                    <div class="ushow-field">
-                        <span class="ushow-label">{{ __('users.gender') }}</span>
-                        <span class="ushow-value {{ $genderLabel ? '' : 'empty' }}">{{ $genderLabel ?: $empty }}</span>
-                    </div>
-                    <div class="ushow-field">
-                        <span class="ushow-label">{{ __('users.first_name') }}</span>
-                        <span class="ushow-value {{ $profile->first_name ? '' : 'empty' }}">{{ $profile->first_name ?: $empty }}</span>
-                    </div>
-                    <div class="ushow-field">
-                        <span class="ushow-label">{{ __('users.last_name') }}</span>
-                        <span class="ushow-value {{ $profile->last_name ? '' : 'empty' }}">{{ $profile->last_name ?: $empty }}</span>
-                    </div>
-                    <div class="ushow-field">
-                        <span class="ushow-label">{{ __('users.middle_name') }}</span>
-                        <span class="ushow-value {{ $profile->middle_name ? '' : 'empty' }}">{{ $profile->middle_name ?: $empty }}</span>
-                    </div>
-                    <div class="ushow-field">
-                        <span class="ushow-label">{{ __('users.date_of_birth') }}</span>
-                        <span class="ushow-value {{ $profile->date_of_birth ? '' : 'empty' }}">
-                            {{ optional($profile->date_of_birth)->format('Y-m-d') ?: $empty }}
-                        </span>
-                    </div>
+            {{-- Personal --}}
+            <div class="review-section">
+                <div class="review-section-header">
+                    <span class="review-section-title">{{ __('users.section_personal') }}</span>
                 </div>
-            @else
-                <p class="ushow-empty-note">{{ __('users.no_profile') }}</p>
-            @endif
-        </section>
-
-        <section class="ushow-panel" style="--i:1">
-            <div class="ushow-panel-head">
-                <x-icon name="globe" class="ushow-panel-icon" />
-                <h2>{{ __('users.section_contact') }}</h2>
-            </div>
-            <div class="ushow-grid">
-                <div class="ushow-field ushow-field-wide">
-                    <span class="ushow-label">{{ __('users.email') }}</span>
-                    <span class="ushow-value">
-                        <a class="ushow-link" href="mailto:{{ $user->email }}">{{ $user->email }}</a>
-                    </span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.mobile_number') }}</span>
-                    <span class="ushow-value {{ $user->mobile_number ? '' : 'empty' }}">{{ $user->mobile_number ?: $empty }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.whatsapp') }}</span>
-                    <span class="ushow-value {{ $profile?->whatsapp ? '' : 'empty' }}">{{ $profile?->whatsapp ?: $empty }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.telegram') }}</span>
-                    <span class="ushow-value {{ $profile?->telegram ? '' : 'empty' }}">{{ $profile?->telegram ?: $empty }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.nationality') }}</span>
-                    <span class="ushow-value {{ $user->nationality ? '' : 'empty' }}">{{ $user->nationality ?: $empty }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.national_id') }}</span>
-                    <span class="ushow-value {{ $user->national_id ? '' : 'empty' }}">{{ $user->national_id ?: $empty }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.passport_number') }}</span>
-                    <span class="ushow-value {{ $user->passport_number ? '' : 'empty' }}">{{ $user->passport_number ?: $empty }}</span>
-                </div>
-                <div class="ushow-field ushow-field-wide">
-                    <span class="ushow-label">{{ __('users.address') }}</span>
-                    <span class="ushow-value {{ $profile?->address ? '' : 'empty' }}">{{ $profile?->address ?: $empty }}</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="ushow-panel" style="--i:2">
-            <div class="ushow-panel-head">
-                <x-icon name="shield" class="ushow-panel-icon" />
-                <h2>{{ __('users.section_account') }}</h2>
-            </div>
-            <div class="ushow-grid">
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.username') }}</span>
-                    <span class="ushow-value">{{ $user->username }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.role_id') }}</span>
-                    <span class="ushow-value {{ $user->role_id ? '' : 'empty' }}">{{ $user->role_id ?: $empty }}</span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.column_type') }}</span>
-                    <span class="ushow-value">
-                        @if($typeEnum)
-                            <span class="badge {{ $typeEnum->color() }}">{{ $typeEnum->label() }}</span>
-                        @else
-                            {{ $user->type ?? $empty }}
-                        @endif
-                    </span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.column_status') }}</span>
-                    <span class="ushow-value">
-                        @if($statusEnum)
-                            <span class="badge {{ $statusEnum->color() }}">
-                                <span class="badge-dot"></span>{{ $statusEnum->label() }}
+                @if($profile)
+                    <div class="review-grid">
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.title_field') }}</span>
+                            <span class="review-value {{ $profile->title ? '' : 'empty' }}">{{ $profile->title ?: $empty }}</span>
+                        </div>
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.gender') }}</span>
+                            <span class="review-value {{ $genderLabel ? '' : 'empty' }}">{{ $genderLabel ?: $empty }}</span>
+                        </div>
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.first_name') }}</span>
+                            <span class="review-value {{ $profile->first_name ? '' : 'empty' }}">{{ $profile->first_name ?: $empty }}</span>
+                        </div>
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.middle_name') }}</span>
+                            <span class="review-value {{ $profile->middle_name ? '' : 'empty' }}">{{ $profile->middle_name ?: $empty }}</span>
+                        </div>
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.last_name') }}</span>
+                            <span class="review-value {{ $profile->last_name ? '' : 'empty' }}">{{ $profile->last_name ?: $empty }}</span>
+                        </div>
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.date_of_birth') }}</span>
+                            <span class="review-value {{ $profile->date_of_birth ? '' : 'empty' }}">
+                                {{ optional($profile->date_of_birth)->format('Y-m-d') ?: $empty }}
                             </span>
-                        @else
-                            {{ $user->status ?? $empty }}
-                        @endif
-                    </span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.created_by') }}</span>
-                    <span class="ushow-value {{ $user->createdBy ? '' : 'empty' }}">
-                        {{ $user->createdBy?->username ?: $empty }}
-                    </span>
-                </div>
-                <div class="ushow-field">
-                    <span class="ushow-label">{{ __('users.updated_by') }}</span>
-                    <span class="ushow-value {{ $user->updatedBy ? '' : 'empty' }}">
-                        {{ $user->updatedBy?->username ?: $empty }}
-                    </span>
-                </div>
-                @if($user->status_details)
-                    <div class="ushow-field ushow-field-wide">
-                        <span class="ushow-label">{{ __('users.status_details') }}</span>
-                        <span class="ushow-value">{{ $user->status_details }}</span>
+                        </div>
+                        <div class="review-field">
+                            <span class="review-label">{{ __('users.avatar') }}</span>
+                            @if($avatarUrl)
+                                <img class="review-avatar-thumb" src="{{ $avatarUrl }}" alt="{{ $displayName }}">
+                            @else
+                                <span class="review-value empty">{{ $empty }}</span>
+                            @endif
+                        </div>
                     </div>
+                @else
+                    <p class="ushow-empty-note">{{ __('users.no_profile') }}</p>
                 @endif
             </div>
-        </section>
 
-        @if($profile?->note)
-            <section class="ushow-panel" style="--i:3">
-                <div class="ushow-panel-head">
-                    <x-icon name="file-text" class="ushow-panel-icon" />
-                    <h2>{{ __('users.section_notes') }}</h2>
+            {{-- Contact & Identity --}}
+            <div class="review-section">
+                <div class="review-section-header">
+                    <span class="review-section-title">{{ __('users.section_contact') }}</span>
                 </div>
-                <p class="ushow-note-body">{{ $profile->note }}</p>
-            </section>
-        @endif
+                <div class="review-grid">
+                    <div class="review-field ushow-field-wide">
+                        <span class="review-label">{{ __('users.email') }}</span>
+                        <span class="review-value">
+                            <a class="ushow-link" href="mailto:{{ $user->email }}">{{ $user->email }}</a>
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.mobile_number') }}</span>
+                        <span class="review-value {{ $user->mobile_number ? '' : 'empty' }}">{{ $user->mobile_number ?: $empty }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.whatsapp') }}</span>
+                        <span class="review-value {{ $profile?->whatsapp ? '' : 'empty' }}">{{ $profile?->whatsapp ?: $empty }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.telegram') }}</span>
+                        <span class="review-value {{ $profile?->telegram ? '' : 'empty' }}">{{ $profile?->telegram ?: $empty }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.nationality') }}</span>
+                        <span class="review-value {{ $user->nationality ? '' : 'empty' }}">{{ $user->nationality ?: $empty }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.national_id') }}</span>
+                        <span class="review-value {{ $user->national_id ? '' : 'empty' }}">{{ $user->national_id ?: $empty }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.passport_number') }}</span>
+                        <span class="review-value {{ $user->passport_number ? '' : 'empty' }}">{{ $user->passport_number ?: $empty }}</span>
+                    </div>
+                    <div class="review-field ushow-field-wide">
+                        <span class="review-label">{{ __('users.address') }}</span>
+                        <span class="review-value {{ $profile?->address ? '' : 'empty' }}">{{ $profile?->address ?: $empty }}</span>
+                    </div>
+                </div>
+            </div>
 
+            {{-- Account & Access --}}
+            <div class="review-section">
+                <div class="review-section-header">
+                    <span class="review-section-title">{{ __('users.section_account') }}</span>
+                </div>
+                <div class="review-grid">
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.username') }}</span>
+                        <span class="review-value">{{ $user->username }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.role_id') }}</span>
+                        <span class="review-value {{ $user->role_id ? '' : 'empty' }}">{{ $user->role_id ?: $empty }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.column_type') }}</span>
+                        <span class="review-value">
+                            @if($typeEnum)
+                                <span class="badge {{ $typeEnum->color() }}">{{ $typeEnum->label() }}</span>
+                            @else
+                                {{ $user->type ?? $empty }}
+                            @endif
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.column_status') }}</span>
+                        <span class="review-value">
+                            @if($statusEnum)
+                                <span class="badge {{ $statusEnum->color() }}">
+                                    <span class="badge-dot"></span>{{ $statusEnum->label() }}
+                                </span>
+                            @else
+                                {{ $user->status ?? $empty }}
+                            @endif
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.credits') }}</span>
+                        <span class="review-value">{{ number_format((int) $user->credits) }}</span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.can_login') }}</span>
+                        <span class="review-value {{ $user->can_login ? 'ok' : '' }}">
+                            {{ $user->can_login ? __('users.yes') : __('users.no') }}
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.column_joined') }}</span>
+                        <span class="review-value {{ $user->created_at ? '' : 'empty' }}">
+                            {{ optional($user->created_at)->format('Y-m-d') ?: $empty }}
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.updated_at') }}</span>
+                        <span class="review-value {{ $user->updated_at ? '' : 'empty' }}">
+                            {{ optional($user->updated_at)->format('Y-m-d') ?: $empty }}
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.created_by') }}</span>
+                        <span class="review-value {{ $user->createdBy ? '' : 'empty' }}">
+                            {{ $user->createdBy?->username ?: $empty }}
+                        </span>
+                    </div>
+                    <div class="review-field">
+                        <span class="review-label">{{ __('users.updated_by') }}</span>
+                        <span class="review-value {{ $user->updatedBy ? '' : 'empty' }}">
+                            {{ $user->updatedBy?->username ?: $empty }}
+                        </span>
+                    </div>
+                    @if($user->status_details)
+                        <div class="review-field ushow-field-wide">
+                            <span class="review-label">{{ __('users.status_details') }}</span>
+                            <span class="review-value">{{ $user->status_details }}</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Notes --}}
+            @if($profile?->note)
+                <div class="review-section">
+                    <div class="review-section-header">
+                        <span class="review-section-title">{{ __('users.section_notes') }}</span>
+                        <a href="{{ $editUrl }}" class="review-section-edit">{{ __('users.edit') }}</a>
+                    </div>
+                    <div class="ushow-note-body">{{ $profile->note }}</div>
+                </div>
+            @endif
+
+        </div>
     </div>
 </div>
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/user-wizard.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/user-show.css') }}">
 @endpush
 
