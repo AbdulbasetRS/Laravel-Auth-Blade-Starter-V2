@@ -73,7 +73,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function renderRow(user) {
-    var initial = escapeHtml((user.name || '?').charAt(0));
+    var displayName = user.name || user.username || '?';
+    var initial = escapeHtml(String(displayName).charAt(0).toUpperCase());
+    var avatarHtml = user.avatar
+      ? '<img class="user-avatar-sm has-image" src="' + escapeHtml(user.avatar) + '" alt="' + escapeHtml(displayName) + '">'
+      : '<div class="user-avatar-sm">' + initial + '</div>';
     var statusBadge = user.status === 'active'
       ? '<span class="badge active"><span class="badge-dot"></span>Active</span>'
       : '<span class="badge inactive"><span class="badge-dot"></span>Inactive</span>';
@@ -84,12 +88,12 @@ document.addEventListener('DOMContentLoaded', function () {
     return '' +
       '<tr>' +
         '<td data-col="user"><div class="user-cell">' +
-          '<div class="user-avatar-sm">' + initial + '</div>' +
-          '<div><div class="user-cell-name">' + escapeHtml(user.name) + '</div>' +
+          avatarHtml +
+          '<div><div class="user-cell-name">' + escapeHtml(displayName) + '</div>' +
           '<div class="user-cell-email">' + escapeHtml(user.email) + '</div></div>' +
         '</div></td>' +
         '<td data-col="status">' + statusBadge + '</td>' +
-        '<td data-col="type">' + user.type + '</td>' +
+        '<td data-col="type">' + escapeHtml(user.type_label || user.type || '') + '</td>' +
         '<td data-col="verified">' + verified + '</td>' +
         '<td data-col="joined" style="font-family:\'IBM Plex Mono\',monospace;font-size:12px;">' + escapeHtml((user.created_at || '').substring(0, 10)) + '</td>' +
         '<td data-col="actions">' +
@@ -107,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 (window.usersLabels ? usersLabels.view : 'View') +
               '</a>' +
               '<div class="gdropdown-item destructive" role="menuitem" data-action="delete-user" ' +
-                'data-id="' + escapeHtml(user.id) + '" data-name="' + escapeHtml(user.name) + '" ' +
+                'data-id="' + escapeHtml(user.id) + '" data-name="' + escapeHtml(displayName) + '" ' +
                 'data-email="' + escapeHtml(user.email) + '" data-status="' + escapeHtml(user.status) + '">' +
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> ' +
                 (window.usersLabels ? usersLabels.delete : 'Delete') +

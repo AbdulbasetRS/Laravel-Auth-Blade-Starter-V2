@@ -18,7 +18,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function getFiltered(array $filters = []): LengthAwarePaginator
     {
-        $query = $this->applyFilters(User::query(), $filters);
+        $query = $this->applyFilters(User::query()->with('profile'), $filters);
 
         $perPage = (int) ($filters['per_page'] ?? 10);
 
