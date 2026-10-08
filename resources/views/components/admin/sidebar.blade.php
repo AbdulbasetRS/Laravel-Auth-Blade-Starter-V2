@@ -1,6 +1,6 @@
 <aside class="admin-sidebar" id="adminSidebar">
     <nav class="sidebar-nav">
-        <a href="{{ route('admin.test') }}" class="sidebar-item {{ request()->routeIs('admin.test') ? 'active' : '' }}">
+        <a href="{{ route('admin.dashboard') }}" class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <x-icon name="grid" />
             <span class="sidebar-label">{{ __('navigation.dashboard') }}</span>
         </a>

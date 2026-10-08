@@ -23,7 +23,7 @@ Route::group([
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
         Route::prefix('admin')->name('admin.')->group(function () {
-            Route::get('/test', DashboardTestController::class)->name('test');
+            Route::get('/dashboard', DashboardTestController::class)->name('dashboard');
 
             // Reference pages — living documentation, not tied to Database
             Route::view('/system-design', 'admin.system-design')->name('system-design');
